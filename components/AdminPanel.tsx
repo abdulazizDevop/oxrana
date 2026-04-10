@@ -59,11 +59,29 @@ type Camera = {
   name: string; url: string; type: string; created_at: string;
 };
 
+function usePersistedState<T>(key: string, defaultValue: T): [T, (v: T | ((prev: T) => T)) => void] {
+  const [state, _setState] = useState<T>(() => {
+    if (typeof window === 'undefined') return defaultValue;
+    try {
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : defaultValue;
+    } catch { return defaultValue; }
+  });
+  const setState = (v: T | ((prev: T) => T)) => {
+    _setState(prev => {
+      const next = typeof v === 'function' ? (v as (p: T) => T)(prev) : v;
+      try { localStorage.setItem(key, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+  return [state, setState];
+}
+
 export default function AdminPanel({ onExit }: Props) {
-  const [tab, setTab] = useState<Tab>("users");
+  const [tab, setTab] = usePersistedState<Tab>("admin_tab", "users");
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({ plan: true, management: true });
+  const [openGroups, setOpenGroups] = usePersistedState<Record<string, boolean>>("admin_sidebar_groups", { plan: true, management: true });
 
   const adminUser: AppUser = {
     id: "admin_global",
@@ -221,6 +239,7 @@ export default function AdminPanel({ onExit }: Props) {
   const [selectedCity, setSelectedCity] = useState<string>(DEFAULT_CITIES[0].id);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [newCoName, setNewCoName] = useState("");
+  const [newCoDesc, setNewCoDesc] = useState("");
   const [coError, setCoError] = useState("");
   const [deleteCoConfirm, setDeleteCoConfirm] = useState<string | null>(null);
   const [allCities, setAllCities] = useState(DEFAULT_CITIES);
@@ -251,6 +270,8 @@ export default function AdminPanel({ onExit }: Props) {
   // Subscriptions
   const [adminSettings, setAdminSettings] = useState<Record<string, string>>({});
   const [subPhoneEdit, setSubPhoneEdit] = useState("");
+  const [subCardEdit, setSubCardEdit] = useState("");
+  const [subPriceEdit, setSubPriceEdit] = useState("9 990 ₽");
   const [subLoading, setSubLoading] = useState(false);
   const [allCompanies, setAllCompanies] = useState<Company[]>([]);
   const [extendingCompany, setExtendingCompany] = useState<string | null>(null);
@@ -262,6 +283,8 @@ export default function AdminPanel({ onExit }: Props) {
       fetch("/api/admin/settings").then(r => r.json()).then(data => {
         setAdminSettings(data);
         setSubPhoneEdit(data.subscription_phone || "");
+        setSubCardEdit(data.subscription_card || "");
+        setSubPriceEdit(data.subscription_price || "9 990 ₽");
       }).catch(() => {});
       
       fetch("/api/companies").then(r => r.json()).then(data => {
@@ -271,12 +294,14 @@ export default function AdminPanel({ onExit }: Props) {
     }
   }, [tab]);
 
-  const handleUpdateSubPhone = async () => {
-    await fetch("/api/admin/settings", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: "subscription_phone", value: subPhoneEdit }),
-    });
-    setAdminSettings(prev => ({ ...prev, subscription_phone: subPhoneEdit }));
+  const handleSavePaymentSettings = async () => {
+    const h = { "Content-Type": "application/json" };
+    await Promise.all([
+      fetch("/api/admin/settings", { method: "POST", headers: h, body: JSON.stringify({ id: "subscription_phone", value: subPhoneEdit }) }),
+      fetch("/api/admin/settings", { method: "POST", headers: h, body: JSON.stringify({ id: "subscription_card", value: subCardEdit }) }),
+      fetch("/api/admin/settings", { method: "POST", headers: h, body: JSON.stringify({ id: "subscription_price", value: subPriceEdit }) }),
+    ]);
+    setAdminSettings(prev => ({ ...prev, subscription_phone: subPhoneEdit, subscription_card: subCardEdit, subscription_price: subPriceEdit }));
   };
 
   const handleExtendSubscription = async (companyId: string, months: number) => {
@@ -370,7 +395,7 @@ export default function AdminPanel({ onExit }: Props) {
 
   const refreshCompanies = () => {
     fetch("/api/companies").then(r => r.json()).then((rows: any[]) => {
-      setCompanies(rows.map(r => ({ id: r.id, cityId: r.cityId || r.city_id, name: r.name })));
+      setCompanies(rows.map(r => ({ id: r.id, cityId: r.cityId || r.city_id, name: r.name, description: r.description, professions_list: r.professions_list, employee_count: r.employee_count, subscriptionEndsAt: r.subscriptionEndsAt, ownerId: r.ownerId })));
     }).catch(() => {});
   };
 
@@ -443,11 +468,11 @@ export default function AdminPanel({ onExit }: Props) {
       if (!name) { setCoError("Введите название"); return; }
       if (!selectedCity) { setCoError("Выберите город"); return; }
       const id = name.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now();
-      const res = await fetch("/api/companies", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, cityId: selectedCity, name }) });
+      const res = await fetch("/api/companies", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, cityId: selectedCity, name, description: newCoDesc.trim() }) });
       if (!res.ok) { setCoError("Ошибка при добавлении"); return; }
       const newCo = await res.json();
-      setCompanies(prev => [...prev, { id: newCo.id, cityId: newCo.cityId || newCo.city_id || selectedCity, name: newCo.name }]);
-      setNewCoName(""); setCoError("");
+      setCompanies(prev => [...prev, { id: newCo.id, cityId: newCo.cityId || newCo.city_id || selectedCity, name: newCo.name, description: newCo.description }]);
+      setNewCoName(""); setNewCoDesc(""); setCoError("");
     };
   const handleDeleteCompany = async (id: string) => {
     await fetch(`/api/companies?id=${id}`, { method: "DELETE" });
@@ -770,16 +795,24 @@ export default function AdminPanel({ onExit }: Props) {
                           <h3 style={{ fontSize: 16, fontWeight: 700, color: "#e8e8f0", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
                             <span>⚙️</span> Настройки подписки
                           </h3>
-                          <div style={{ display: "flex", gap: 12, alignItems: "flex-end", maxWidth: 500 }}>
-                            <div style={{ flex: 1 }}>
-                              <label style={{ fontSize: 11, color: "#55556a", display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.08em" }}>Номер телефона в модальном окне</label>
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, maxWidth: 600, marginBottom: 16 }}>
+                            <div>
+                              <label style={{ fontSize: 10, color: "#55556a", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>Телефон для связи</label>
                               <input type="text" value={subPhoneEdit} onChange={e => setSubPhoneEdit(e.target.value)} style={inp} placeholder="+7 (999) 000-00-00" />
                             </div>
-                            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={handleUpdateSubPhone}
-                              style={{ background: "rgba(79,142,247,0.1)", border: "1px solid rgba(79,142,247,0.25)", borderRadius: 11, padding: "11px 20px", color: "#4f8ef7", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-                              Сохранить
-                            </motion.button>
+                            <div>
+                              <label style={{ fontSize: 10, color: "#55556a", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>Номер карты для оплаты</label>
+                              <input type="text" value={subCardEdit} onChange={e => setSubCardEdit(e.target.value)} style={inp} placeholder="2200 0000 0000 0000" />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, color: "#55556a", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>Стоимость за 1 объект</label>
+                              <input type="text" value={subPriceEdit} onChange={e => setSubPriceEdit(e.target.value)} style={inp} placeholder="9 990 ₽" />
+                            </div>
                           </div>
+                          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={handleSavePaymentSettings}
+                            style={{ background: "linear-gradient(135deg, #4f8ef7, #2563eb)", border: "none", borderRadius: 14, padding: "13px 28px", color: "white", fontSize: 15, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 14px rgba(79,142,247,0.3)" }}>
+                            💾 Сохранить реквизиты
+                          </motion.button>
                         </div>
 
                         {/* Company List */}
@@ -1283,27 +1316,41 @@ export default function AdminPanel({ onExit }: Props) {
                       </div>
 
                         {/* Форма добавления */}
-                        <div style={{ background: "rgba(79,142,247,0.04)", border: "1px solid rgba(79,142,247,0.15)", borderRadius: 16, padding: "16px 18px", marginBottom: 18 }}>
-                          <div style={{ fontSize: 11, color: "#55556a", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.09em", fontWeight: 700 }}>
-                            + Новая компания
-                          </div>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                              <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)}
-                                style={{ ...inp, fontSize: 13, color: selectedCity ? "#e0e0f0" : "#6b6b80" }}>
-                                <option value="">— Выберите город —</option>
-                                {allCities.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                              </select>
-                            <div style={{ display: "flex", gap: 10 }}>
-                              <input type="text" value={newCoName} onChange={e => { setNewCoName(e.target.value); setCoError(""); }}
-                                onKeyDown={e => e.key === "Enter" && handleAddCompany()}
-                                placeholder="Название компании или объекта..." style={{ ...inp, flex: 1 }} />
-                              <motion.button onClick={handleAddCompany} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                                style={{ background: "linear-gradient(135deg, #4f8ef7, #2563eb)", border: "none", borderRadius: 14, padding: "13px 30px", fontSize: 15, fontWeight: 600, color: "white", cursor: "pointer", flexShrink: 0, boxShadow: "0 4px 12px rgba(79,142,247,0.25)", whiteSpace: "nowrap" }}>
-                                + Добавить
-                              </motion.button>
+                        <div style={{ background: "rgba(79,142,247,0.04)", border: "1px solid rgba(79,142,247,0.12)", borderRadius: 20, padding: "20px 22px", marginBottom: 20 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                            <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(79,142,247,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>🏢</div>
+                            <div>
+                              <div style={{ fontSize: 14, fontWeight: 700, color: "#e0e0f0" }}>Новая компания</div>
+                              <div style={{ fontSize: 11, color: "#55556a" }}>Заполните данные объекта</div>
                             </div>
                           </div>
-                          {coError && <p style={{ fontSize: 12, color: "#e63946", marginTop: 8, margin: "8px 0 0" }}>⚠️ {coError}</p>}
+                          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 12 }}>
+                            <div>
+                              <label style={{ fontSize: 10, color: "#55556a", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, display: "block", marginBottom: 6 }}>Город</label>
+                              <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)}
+                                style={{ ...inp, color: selectedCity ? "#e0e0f0" : "#6b6b80" }}>
+                                <option value="">— Выберите —</option>
+                                {allCities.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <label style={{ fontSize: 10, color: "#55556a", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, display: "block", marginBottom: 6 }}>Название</label>
+                              <input type="text" value={newCoName} onChange={e => { setNewCoName(e.target.value); setCoError(""); }}
+                                onKeyDown={e => e.key === "Enter" && handleAddCompany()}
+                                placeholder="ЧОП «Безопасность»" style={{ ...inp }} />
+                            </div>
+                          </div>
+                          <div style={{ marginBottom: 14 }}>
+                            <label style={{ fontSize: 10, color: "#55556a", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, display: "block", marginBottom: 6 }}>Описание</label>
+                            <input type="text" value={newCoDesc} onChange={e => setNewCoDesc(e.target.value)}
+                              onKeyDown={e => e.key === "Enter" && handleAddCompany()}
+                              placeholder="Адрес, контакты, примечания..." style={{ ...inp }} />
+                          </div>
+                          {coError && <div style={{ fontSize: 13, color: "#e63946", marginBottom: 12, padding: "10px 14px", background: "rgba(230,57,70,0.08)", borderRadius: 12, border: "1px solid rgba(230,57,70,0.15)" }}>⚠️ {coError}</div>}
+                          <motion.button onClick={handleAddCompany} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                            style={{ background: "linear-gradient(135deg, #4f8ef7, #2563eb)", border: "none", borderRadius: 14, padding: "13px 28px", fontSize: 15, fontWeight: 600, color: "white", cursor: "pointer", boxShadow: "0 4px 14px rgba(79,142,247,0.3)", display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Добавить компанию
+                          </motion.button>
                         </div>
 
                       {/* Список компаний */}

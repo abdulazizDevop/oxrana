@@ -1,3 +1,20 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyToken } from './jwt';
+
+// Auth helper — use in every protected route
+export async function requireAuth(req: NextRequest): Promise<{ payload: any } | NextResponse> {
+  const token = req.cookies.get('auth_token')?.value;
+  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const payload = await verifyToken(token);
+  if (!payload) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+  return { payload };
+}
+
+export function requireAdmin(payload: any): NextResponse | null {
+  if (!payload?.is_admin) return NextResponse.json({ error: 'Forbidden: Admin only' }, { status: 403 });
+  return null;
+}
+
 // Типы
 export type SectionId = "patrol" | "shift" | "posts" | "photo" | "apartment" | "inventory" | "transport" | "schedule" | "fines" | "requests" | "employees";
 

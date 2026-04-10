@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     );
 
     const userId = "user_" + Date.now();
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 12);
     const allowedSections = ["patrol", "shift", "posts", "photo", "apartment", "inventory", "transport", "schedule", "fines", "requests", "employees", "conference"];
     
     await query(

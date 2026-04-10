@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+
     const { searchParams } = new URL(req.url);
     const cityId = searchParams.get('cityId');
     const id = searchParams.get('id');
@@ -11,7 +15,6 @@ export async function GET(req: NextRequest) {
       const res = await query('SELECT id, city_id as "cityId", name, description, professions_list, employee_count, created_at as "createdAt", subscription_ends_at as "subscriptionEndsAt", owner_id as "ownerId" FROM companies WHERE id = $1', [id]);
       return NextResponse.json(res.rows[0]);
     }
-
     if (cityId) {
       const res = await query('SELECT id, city_id as "cityId", name, description, professions_list, employee_count, created_at as "createdAt", subscription_ends_at as "subscriptionEndsAt", owner_id as "ownerId" FROM companies WHERE city_id = $1 ORDER BY name ASC', [cityId]);
       return NextResponse.json(res.rows);
@@ -25,6 +28,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+
     const { id, cityId, name, description, professions_list, employee_count, ownerId } = await req.json();
     if (!id || !name) return NextResponse.json({ error: 'id and name required' }, { status: 400 });
 
@@ -43,6 +49,9 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+
     const { id, name, description, professions_list, employee_count, subscriptionEndsAt } = await req.json();
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     const res = await query(
@@ -57,6 +66,9 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+
     const id = req.nextUrl.searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     await query('DELETE FROM companies WHERE id = $1', [id]);

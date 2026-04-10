@@ -1,7 +1,7 @@
-// POST /api/seed-test-users — создаёт тестовых пользователей по одному на каждую секцию
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { requireAuth, requireAdmin } from '@/lib/auth';
 
 const TEST_PASSWORD = 'test123';
 
@@ -20,53 +20,61 @@ const TEST_USERS = [
   { login: 'test_work_schedule',name: 'Тест Вахта',       role: 'guard',    profession: 'Охранник',  section: 'work_schedule' },
 ];
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
-    const hash = await bcrypt.hash(TEST_PASSWORD, 10);
-    const created: { login: string; name: string; section: string; password: string }[] = [];
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+    const adminCheck = requireAdmin(auth.payload);
+    if (adminCheck) return adminCheck;
+
+    const hash = await bcrypt.hash(TEST_PASSWORD, 12);
+    const created: { login: string; name: string; section: string }[] = [];
     const skipped: string[] = [];
 
     for (const u of TEST_USERS) {
-      // Check if already exists
       const existing = await query('SELECT id FROM app_users WHERE login = $1', [u.login]);
-      if (existing.rows.length > 0) {
-        skipped.push(u.login);
-        continue;
-      }
+      if (existing.rows.length > 0) { skipped.push(u.login); continue; }
       const id = 'test_' + u.section + '_' + Date.now();
       await query(
         `INSERT INTO app_users (id, name, role, profession, login, password_hash, plain_password, allowed_sections, allowed_cities, allowed_companies, is_admin)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, '{}', '{}', false)`,
         [id, u.name, u.role, u.profession, u.login, hash, TEST_PASSWORD, [u.section]]
       );
-      created.push({ login: u.login, name: u.name, section: u.section, password: TEST_PASSWORD });
+      created.push({ login: u.login, name: u.name, section: u.section });
     }
-
     return NextResponse.json({ created, skipped });
-  } catch (err) {
-    console.error('Seed test users error:', err);
-    return NextResponse.json({ error: 'Ошибка создания тестовых пользователей' }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+    const adminCheck = requireAdmin(auth.payload);
+    if (adminCheck) return adminCheck;
+
     const res = await query(
-      `SELECT id, name, login, plain_password, allowed_sections FROM app_users WHERE login LIKE 'test_%' ORDER BY created_at ASC`
+      `SELECT id, name, login, plain_password, allowed_sections FROM app_users WHERE login LIKE $1 ORDER BY created_at ASC`,
+      ['test_%']
     );
     return NextResponse.json(res.rows);
-  } catch (err) {
-    console.error('Get test users error:', err);
-    return NextResponse.json({ error: 'Ошибка получения тестовых пользователей' }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
   try {
-    await query(`DELETE FROM app_users WHERE login LIKE 'test_%'`);
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+    const adminCheck = requireAdmin(auth.payload);
+    if (adminCheck) return adminCheck;
+
+    await query(`DELETE FROM app_users WHERE login LIKE $1`, ['test_%']);
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error('Delete test users error:', err);
-    return NextResponse.json({ error: 'Ошибка удаления тестовых пользователей' }, { status: 500 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

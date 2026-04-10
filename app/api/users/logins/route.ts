@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   if (existing.rows.length > 0) {
     return NextResponse.json({ error: 'Логин уже занят' }, { status: 409 });
   }
-  const hash = await bcrypt.hash(password, 10);
+  const hash = await bcrypt.hash(password, 12);
   const id = 'ul_' + Date.now();
   const res = await query(
     `INSERT INTO user_logins (id, user_id, login, plain_password, password_hash, label)

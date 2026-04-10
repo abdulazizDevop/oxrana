@@ -15,12 +15,18 @@ export default function FinesSection({ city, companyId }: { city: string; compan
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ guard: "", violation: "", amount: "", notes: "", status: "pending" });
+  const [employees, setEmployees] = useState<{ id: string; name: string }[]>([]);
     const [saving, setSaving] = useState(false);
     const [pendingId, setPendingId] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
 
 
   useEffect(() => { fetchAll(); }, [city, companyId]);
+  useEffect(() => {
+    fetch("/api/users").then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setEmployees(data.map((u: any) => ({ id: u.id, name: u.name })));
+    }).catch(() => {});
+  }, []);
 
   async function fetchAll() {
     setLoading(true);
@@ -109,8 +115,16 @@ export default function FinesSection({ city, companyId }: { city: string; compan
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Охранник</label>
-                  <input placeholder="ФИО охранника" value={form.guard} onChange={e => setForm({ ...form, guard: e.target.value })}
-                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
+                  {employees.length > 0 ? (
+                    <select value={form.guard} onChange={e => setForm({ ...form, guard: e.target.value })}
+                      className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all cursor-pointer">
+                      <option value="" className="bg-[#0a0a0f]">— Выберите —</option>
+                      {employees.map(e => <option key={e.id} value={e.name} className="bg-[#0a0a0f]">{e.name}</option>)}
+                    </select>
+                  ) : (
+                    <input placeholder="ФИО охранника" value={form.guard} onChange={e => setForm({ ...form, guard: e.target.value })}
+                      className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
+                  )}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Нарушение</label>

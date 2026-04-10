@@ -10,10 +10,19 @@ export async function PATCH(req: NextRequest) {
   const payload = await verifyToken(token);
   if (!payload || !payload.id) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
-  const { login, password } = await req.json();
+  const { login, password, oldPassword } = await req.json();
 
   if (!login && !password) {
     return NextResponse.json({ error: 'No data to update' }, { status: 400 });
+  }
+
+  // Require old password when changing password
+  if (password) {
+    if (!oldPassword) return NextResponse.json({ error: 'Введите текущий пароль' }, { status: 400 });
+    const userRes = await query('SELECT password_hash FROM app_users WHERE id = $1', [payload.id]);
+    if (userRes.rows.length === 0) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    const valid = await bcrypt.compare(oldPassword, userRes.rows[0].password_hash);
+    if (!valid) return NextResponse.json({ error: 'Неверный текущий пароль' }, { status: 401 });
   }
 
   // If login is provided, check if it's already taken by someone else
@@ -26,7 +35,7 @@ export async function PATCH(req: NextRequest) {
 
   try {
     if (login && password) {
-      const hash = await bcrypt.hash(password, 10);
+      const hash = await bcrypt.hash(password, 12);
       await query(
         'UPDATE app_users SET login = $1, password_hash = $2, plain_password = $3 WHERE id = $4',
         [login, hash, password, payload.id]
@@ -34,7 +43,7 @@ export async function PATCH(req: NextRequest) {
     } else if (login) {
       await query('UPDATE app_users SET login = $1 WHERE id = $2', [login, payload.id]);
     } else if (password) {
-      const hash = await bcrypt.hash(password, 10);
+      const hash = await bcrypt.hash(password, 12);
       await query(
         'UPDATE app_users SET password_hash = $1, plain_password = $2 WHERE id = $3',
         [hash, password, payload.id]
@@ -54,7 +63,7 @@ export async function PATCH(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 30,
+      maxAge: 60 * 60 * 24 * 7,
       path: '/',
     });
     return response;

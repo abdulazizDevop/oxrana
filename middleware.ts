@@ -13,7 +13,7 @@ const JWT_SECRET = new TextEncoder().encode(
 const publicPaths = [
   '/api/auth',
   '/api/auth/register',
-  '/api/upload',
+  '/api/applications', // POST only - registration form (checked in route)
 ];
 
 function applySecurityHeaders(response: NextResponse, cspHeader: string) {
@@ -34,12 +34,12 @@ export async function middleware(request: NextRequest) {
 
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval';
+    script-src 'self' 'unsafe-inline';
     style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https: http:;
+    img-src 'self' blob: data: https:;
     font-src 'self' data:;
-    connect-src 'self' https: http: wss: ws:;
-    frame-src 'self' https: http:;
+    connect-src 'self' https: wss:;
+    frame-src 'self' https:;
     object-src 'none';
     base-uri 'none';
     form-action 'self';

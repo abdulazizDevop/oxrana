@@ -26,6 +26,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ guard: "", area: "", notes: "", status: "pending" });
+  const [employees, setEmployees] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<{ id: string; url: string; fileName: string; fileType: string; fileSize: number }[]>([]);
   const [pendingRecordId, setPendingRecordId] = useState<string | null>(null);
@@ -33,6 +34,11 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => { fetchAll(); }, [city, companyId]);
+  useEffect(() => {
+    fetch("/api/users").then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setEmployees(data.map((u: any) => ({ id: u.id, name: u.name })));
+    }).catch(() => {});
+  }, []);
 
   async function fetchAll() {
     setLoading(true);
@@ -153,19 +159,28 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                   </button>
                 </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-white/35 uppercase tracking-widest font-medium">Охранник</label>
+                  {employees.length > 0 ? (
+                    <select value={form.guard} onChange={e => setForm({ ...form, guard: e.target.value })}
+                      className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all cursor-pointer">
+                      <option value="" className="bg-[#0a0a0f]">— Выберите —</option>
+                      {employees.map(e => <option key={e.id} value={e.name} className="bg-[#0a0a0f]">{e.name}</option>)}
+                    </select>
+                  ) : (
+                    <input placeholder="Имя охранника" value={form.guard} onChange={e => setForm({ ...form, guard: e.target.value })}
+                      className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
+                  )}
+                </div>
                 {[
-                  { label: "Охранник", key: "guard", placeholder: "Имя охранника" },
                   { label: "Территория / маршрут", key: "area", placeholder: "Укажите маршрут" },
                   { label: "Примечания", key: "notes", placeholder: "Доп. информация" },
                 ].map(f => (
                   <div key={f.key} className="space-y-1.5">
                     <label className="text-[10px] text-white/35 uppercase tracking-widest font-medium">{f.label}</label>
-                    <input
-                      placeholder={f.placeholder}
-                      value={(form as any)[f.key]}
+                    <input placeholder={f.placeholder} value={(form as any)[f.key]}
                       onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                      className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all"
-                    />
+                      className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
                   </div>
                 ))}
                 <div className="space-y-1.5">

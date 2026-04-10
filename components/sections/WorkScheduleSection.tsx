@@ -67,6 +67,7 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
   const [saving, setSaving] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "rest" | "pending">("all");
+  const [employees, setEmployees] = useState<{ id: string; name: string }[]>([]);
 
   const [form, setForm] = useState({
     employeeName: "",
@@ -82,6 +83,11 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
   });
 
   useEffect(() => { fetchAll(); }, [city, companyId]);
+  useEffect(() => {
+    fetch("/api/users").then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setEmployees(data.map((u: any) => ({ id: u.id, name: u.name })));
+    }).catch(() => {});
+  }, []);
 
   async function fetchAll() {
     setLoading(true);
@@ -214,8 +220,15 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">ФИО сотрудника *</label>
-                    <input placeholder="Иван Иванов" value={form.employeeName}
-                      onChange={e => setForm({ ...form, employeeName: e.target.value })} className={inputCls} />
+                    {employees.length > 0 ? (
+                      <select value={form.employeeName} onChange={e => setForm({ ...form, employeeName: e.target.value })} className={`${inputCls} cursor-pointer`}>
+                        <option value="" className="bg-[#0a0a0f]">— Выберите —</option>
+                        {employees.map(e => <option key={e.id} value={e.name} className="bg-[#0a0a0f]">{e.name}</option>)}
+                      </select>
+                    ) : (
+                      <input placeholder="Иван Иванов" value={form.employeeName}
+                        onChange={e => setForm({ ...form, employeeName: e.target.value })} className={inputCls} />
+                    )}
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Должность</label>

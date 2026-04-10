@@ -75,6 +75,8 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestType, setRequestType] = useState<"connect" | "new_object" | "subscription">("connect");
   const [subscriptionPhone, setSubscriptionPhone] = useState("+7 (999) 000-00-00");
+  const [subscriptionCard, setSubscriptionCard] = useState("");
+  const [subscriptionPrice, setSubscriptionPrice] = useState("9 990 ₽");
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showCredentialsPrompt, setShowCredentialsPrompt] = useState(false);
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
@@ -109,6 +111,8 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
   useEffect(() => {
     fetch("/api/admin/settings").then(r => r.json()).then(s => {
       if (s.subscription_phone) setSubscriptionPhone(s.subscription_phone);
+      if (s.subscription_card) setSubscriptionCard(s.subscription_card);
+      if (s.subscription_price) setSubscriptionPrice(s.subscription_price);
     }).catch(() => {});
   }, []);
 
@@ -648,16 +652,36 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
                 style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.9)", backdropFilter: "blur(20px)" }} />
               <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }}
                 style={{ position: "relative", background: "#12121e", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 32, padding: "40px 32px", width: "100%", maxWidth: 420, zIndex: 1, textAlign: "center", boxShadow: "0 40px 120px rgba(0,0,0,0.8)" }}>
-                <div style={{ fontSize: 64, marginBottom: 20 }}>💳</div>
-                <h3 style={{ fontSize: 24, fontWeight: 800, color: "#f0f0fa", marginBottom: 12 }}>Подписка истекла</h3>
-                <p style={{ fontSize: 15, color: "#808090", lineHeight: 1.6, marginBottom: 30 }}>
-                  Бесплатный период 3 дня закончился. Для продолжения работы необходимо оплатить подписку (9900₽/мес).
+                <div style={{ fontSize: 56, marginBottom: 16 }}>⏳</div>
+                <h3 style={{ fontSize: 22, fontWeight: 800, color: "#f0f0fa", marginBottom: 8 }}>Подписка истекла</h3>
+                <p style={{ fontSize: 14, color: "#808090", lineHeight: 1.6, marginBottom: 24 }}>
+                  Бесплатный период 3 дня закончился. Для продолжения работы оплатите подписку.
                 </p>
-                
-                  <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 20, padding: "20px", border: "1px solid rgba(255,255,255,0.06)", marginBottom: 30 }}>
-                    <div style={{ fontSize: 11, color: "#55556a", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 700 }}>Связаться для продления:</div>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: "#4f8ef7", letterSpacing: "0.02em" }}>{subscriptionPhone}</div>
+
+                {/* Сумма */}
+                <div style={{ background: "linear-gradient(135deg, rgba(79,142,247,0.1), rgba(99,102,241,0.08))", borderRadius: 18, padding: "18px", border: "1px solid rgba(79,142,247,0.15)", marginBottom: 16 }}>
+                  <div style={{ fontSize: 10, color: "#55556a", textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 700, marginBottom: 6 }}>Стоимость за 1 объект</div>
+                  <div style={{ fontSize: 28, fontWeight: 900, color: "#4f8ef7" }}>{subscriptionPrice}<span style={{ fontSize: 14, color: "#606078", fontWeight: 500 }}> / мес</span></div>
+                </div>
+
+                {/* Реквизиты */}
+                <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 18, padding: "18px", border: "1px solid rgba(255,255,255,0.06)", marginBottom: 16, textAlign: "left" }}>
+                  <div style={{ fontSize: 10, color: "#55556a", textTransform: "uppercase", letterSpacing: "0.12em", fontWeight: 700, marginBottom: 12 }}>Реквизиты для оплаты</div>
+                  {subscriptionCard && (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                      <span style={{ fontSize: 12, color: "#606078" }}>Номер карты</span>
+                      <span style={{ fontSize: 15, fontWeight: 700, color: "#e0e0f0", letterSpacing: "0.05em" }}>{subscriptionCard}</span>
+                    </div>
+                  )}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 12, color: "#606078" }}>Телефон</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: "#e0e0f0" }}>{subscriptionPhone}</span>
                   </div>
+                </div>
+
+                <p style={{ fontSize: 12, color: "#55556a", lineHeight: 1.5, marginBottom: 20 }}>
+                  После оплаты нажмите «Отправить заявку» — администратор подтвердит и активирует вашу подписку.
+                </p>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}

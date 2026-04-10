@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Этот email уже зарегистрирован' }, { status: 400 });
     }
 
-    const password_hash = await bcrypt.hash(password, 10);
+    const password_hash = await bcrypt.hash(password, 12);
     const id = "usr_" + Date.now() + "_" + Math.random().toString(36).substring(2,9);
 
     const allowed_sections = [
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 30,
+      maxAge: 60 * 60 * 24 * 7,
       path: '/',
     });
 

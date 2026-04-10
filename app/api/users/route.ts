@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const hash = await bcrypt.hash(password, 10);
+  const hash = await bcrypt.hash(password, 12);
   const res = await query(
     `INSERT INTO app_users (id, name, role, profession, login, password_hash, plain_password, allowed_sections, allowed_cities, allowed_companies, is_admin)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, false) RETURNING id, name, role, profession, login, allowed_sections, allowed_cities, allowed_companies, is_admin`,
@@ -135,7 +135,7 @@ export async function PUT(req: NextRequest) {
   }
 
   if (password) {
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 12);
     await query(
       `UPDATE app_users SET name=$2, role=$3, profession=$4, login=$5, password_hash=$6, plain_password=$7, allowed_sections=$8, allowed_cities=$9, allowed_companies=$10 WHERE id=$1`,
       [id, name, role, profession, login, hash, password, allowedSections || [], allowedCities || [], allowedCompanies || []]

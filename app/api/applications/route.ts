@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { requireAuth } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+
     const res = await query('SELECT * FROM connection_applications ORDER BY created_at DESC');
     return NextResponse.json(res.rows);
   } catch (e: any) {
@@ -26,6 +30,9 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+
     const { id, status } = await req.json();
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     const res = await query(
@@ -40,6 +47,9 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+
     const id = req.nextUrl.searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     await query('DELETE FROM connection_applications WHERE id = $1', [id]);
