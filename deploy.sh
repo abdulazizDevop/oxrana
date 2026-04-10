@@ -2,12 +2,11 @@
 set -e
 
 APP_DIR="/opt/oxrana"
+cd $APP_DIR
 
 echo "🚀 Deploy boshlandi..."
 
-cd $APP_DIR
-
-# 1. Eng yangi kodni olish
+# 1. Yangi kod
 echo "📥 Git pull..."
 git pull origin main
 
@@ -16,8 +15,8 @@ echo "🐳 Docker build..."
 docker compose down 2>/dev/null || true
 docker compose up -d --build
 
-# 3. Nginx config yangilash
-echo "⚙️ Nginx sozlanmoqda..."
+# 3. Nginx
+echo "⚙️ Nginx..."
 cp nginx.conf /etc/nginx/sites-available/oxrana
 ln -sf /etc/nginx/sites-available/oxrana /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
@@ -26,5 +25,4 @@ nginx -t && systemctl reload nginx
 echo ""
 echo "✅ Deploy muvaffaqiyatli!"
 echo "🌐 http://5.129.247.234"
-echo ""
-docker ps --filter name=oxrana --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+docker ps --filter name=oxrana
