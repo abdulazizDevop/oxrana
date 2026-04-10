@@ -38,13 +38,12 @@ export async function middleware(request: NextRequest) {
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https:;
     font-src 'self' data:;
-    connect-src 'self' https: wss:;
-    frame-src 'self' https:;
+    connect-src 'self' https: http: wss: ws:;
+    frame-src 'self' https: http:;
     object-src 'none';
     base-uri 'none';
     form-action 'self';
     frame-ancestors 'none';
-    upgrade-insecure-requests;
   `.replace(/\s{2,}/g, ' ').trim();
 
   // Basic CSRF Protection: Validate Origin on state-changing requests
