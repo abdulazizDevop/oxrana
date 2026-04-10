@@ -1,5 +1,23 @@
 services:
-  oxrana:
+  db:
+    image: postgres:16-alpine
+    container_name: oxrana-db
+    restart: always
+    environment:
+      POSTGRES_DB: oxrana
+      POSTGRES_USER: oxrana
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-oxrana_secure_2026}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oxrana"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
     build: .
     container_name: oxrana
     restart: always
@@ -9,3 +27,10 @@ services:
       - .env.local
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=postgresql://oxrana:${DB_PASSWORD:-oxrana_secure_2026}@db:5432/oxrana?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
