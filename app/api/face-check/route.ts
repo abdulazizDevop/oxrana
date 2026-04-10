@@ -1,10 +1,6 @@
-// POST /api/face-check — сохранить фото-проверку охранника
-// GET  /api/face-check — получить лог (только для админа)
-
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { uploadToS3 } from '@/lib/s3';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: NextRequest) {
@@ -18,27 +14,16 @@ export async function POST(req: NextRequest) {
     const city = (formData.get('city') as string) || '';
     const companyId = (formData.get('companyId') as string) || '';
 
-    if (!file) {
-      return NextResponse.json({ error: 'Фото не найдено' }, { status: 400 });
-    }
-    if (!userLogin || !userName) {
-      return NextResponse.json({ error: 'Данные пользователя не переданы' }, { status: 400 });
-    }
+    if (!file) return NextResponse.json({ error: 'Фото не найдено' }, { status: 400 });
+    if (!userLogin || !userName) return NextResponse.json({ error: 'Данные пользователя не переданы' }, { status: 400 });
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'face-checks');
-    await mkdir(uploadsDir, { recursive: true });
-
-    const ext = path.extname(file.name) || '.jpg';
+    const ext = file.type === 'image/png' ? '.png' : '.jpg';
     const fileId = uuidv4();
-    const fileName = `${fileId}${ext}`;
-    const filePath = path.join(uploadsDir, fileName);
-    await writeFile(filePath, buffer);
+    const key = `face-checks/${fileId}${ext}`;
 
-    const photoUrl = `/uploads/face-checks/${fileName}`;
-
+    const photoUrl = await uploadToS3(key, buffer, file.type || 'image/jpeg');
     const ipAddress = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '';
 
     await query(

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
+import { uploadToS3 } from '@/lib/s3';
 import { v4 as uuidv4 } from 'uuid';
 
 const ALLOWED_TYPES = new Set([
@@ -9,6 +8,12 @@ const ALLOWED_TYPES = new Set([
   'video/mp4', 'video/webm', 'video/quicktime',
   'application/pdf',
 ]);
+const SAFE_EXTENSIONS: Record<string, string> = {
+  'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif',
+  'image/webp': '.webp', 'image/svg+xml': '.svg',
+  'video/mp4': '.mp4', 'video/webm': '.webm', 'video/quicktime': '.mov',
+  'application/pdf': '.pdf',
+};
 const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 
 export async function POST(req: NextRequest) {
@@ -17,38 +22,17 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File;
     const recordId = formData.get('recordId') as string;
 
-    if (!file) {
-      return NextResponse.json({ error: 'Файл не найден' }, { status: 400 });
-    }
-
-    if (!ALLOWED_TYPES.has(file.type)) {
-      return NextResponse.json({ error: 'Недопустимый тип файла. Разрешены: JPG, PNG, GIF, WebP, MP4, WebM, PDF' }, { status: 400 });
-    }
-
-    if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: 'Файл слишком большой (макс. 50 МБ)' }, { status: 400 });
-    }
+    if (!file) return NextResponse.json({ error: 'Файл не найден' }, { status: 400 });
+    if (!ALLOWED_TYPES.has(file.type)) return NextResponse.json({ error: 'Недопустимый тип файла' }, { status: 400 });
+    if (file.size > MAX_SIZE) return NextResponse.json({ error: 'Файл слишком большой (макс. 50 МБ)' }, { status: 400 });
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    await mkdir(uploadsDir, { recursive: true });
-
-    const SAFE_EXTENSIONS: Record<string, string> = {
-      'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif',
-      'image/webp': '.webp', 'image/svg+xml': '.svg',
-      'video/mp4': '.mp4', 'video/webm': '.webm', 'video/quicktime': '.mov',
-      'application/pdf': '.pdf',
-    };
     const ext = SAFE_EXTENSIONS[file.type] || '.bin';
     const fileId = uuidv4();
-    const fileName = `${fileId}${ext}`;
-    const filePath = path.join(uploadsDir, fileName);
+    const key = `uploads/${fileId}${ext}`;
 
-    await writeFile(filePath, buffer);
-
-    const publicUrl = `/uploads/${fileName}`;
+    const publicUrl = await uploadToS3(key, buffer, file.type);
 
     if (recordId) {
       await query(
