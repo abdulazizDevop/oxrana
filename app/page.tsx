@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppUser, Company } from "@/lib/auth";
+import { formatPhone } from "@/lib/formatPhone";
 import { FaceCheckModal } from "@/components/FaceCheckModal";
 import { RequestModal } from "@/components/RequestModal";
 
@@ -350,10 +351,12 @@ export default function Home() {
         <Background />
 
               {showFaceCheck && pendingUser && (
-        <FaceCheckModal 
+        <FaceCheckModal
           userLogin={pendingUser.login}
           userName={pendingUser.name}
           userId={pendingUser.id}
+          city={city?.id || ''}
+          companyId={company?.id || ''}
           checkType="login"
           onSuccess={() => {
             setShowFaceCheck(false);
@@ -542,7 +545,7 @@ export default function Home() {
                     </div>
                     <div>
                       <label style={labelStyle}>Логин (короткий)</label>
-                      <input type="text" value={regLogin} onChange={e => { setRegLogin(e.target.value); setRegError(""); }} placeholder="my_chop" style={{...iInput(!!regError), padding: "12px 16px"}} />
+                      <input type="text" value={regLogin} onChange={e => { setRegLogin(e.target.value.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase()); setRegError(""); }} placeholder="my_chop" style={{...iInput(!!regError), padding: "12px 16px"}} />
                     </div>
                     <div>
                       <label style={labelStyle}>Email (mail.ru, bk.ru, gmail.com...)</label>
@@ -550,7 +553,7 @@ export default function Home() {
                     </div>
                     <div>
                       <label style={labelStyle}>Телефон</label>
-                      <input type="text" value={regPhone} onChange={e => { setRegPhone(e.target.value); setRegError(""); }} placeholder="+7 (999) 000-00-00" style={{...iInput(!!regError), padding: "12px 16px"}} />
+                      <input type="tel" inputMode="tel" value={regPhone} onChange={e => { setRegPhone(formatPhone(e.target.value)); setRegError(""); }} placeholder="+7 (999) 000-00-00" maxLength={18} style={{...iInput(!!regError), padding: "12px 16px"}} />
                     </div>
                     <div>
                       <label style={labelStyle}>Пароль</label>

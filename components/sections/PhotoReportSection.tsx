@@ -96,7 +96,7 @@ export default function PhotoReportSection({ city, companyId }: { city: string; 
                     className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all resize-none" />
                 </div>
               </div>
-              <FileUpload recordId={pendingId || undefined} files={[]} />
+              <FileUpload recordId={pendingId || undefined} companyId={companyId} files={[]} />
               <div className="flex gap-2 pt-4">
                 <motion.button onClick={save} disabled={saving} whileHover={{ scale: saving ? 1 : 1.02 }} whileTap={{ scale: saving ? 1 : 0.97 }}
                   className="flex-1 py-4 bg-white text-black rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all">

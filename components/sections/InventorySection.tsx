@@ -310,7 +310,7 @@ export default function InventorySection({
                     />
                   </div>
                 </div>
-                <FileUpload recordId={pendingId || undefined} files={[]} />
+                <FileUpload recordId={pendingId || undefined} companyId={companyId} files={[]} />
                 <div className="flex gap-2 pt-4">
                   <motion.button
                     onClick={save} disabled={saving}

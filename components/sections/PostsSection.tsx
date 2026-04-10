@@ -107,7 +107,7 @@ export default function PostsSection({ city, companyId }: { city: string; compan
                     className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-4 text-sm placeholder-white/20 outline-none transition-all" />
                 </div>
               </div>
-              <FileUpload recordId={pendingId || undefined} files={[]} />
+              <FileUpload recordId={pendingId || undefined} companyId={companyId} files={[]} />
               <div className="flex gap-3 pt-4">
                 <motion.button onClick={save} disabled={saving} whileHover={{ scale: saving ? 1 : 1.02 }} whileTap={{ scale: saving ? 1 : 0.97 }}
                   className="flex-1 py-4 bg-white text-black rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all">

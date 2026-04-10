@@ -14,10 +14,12 @@ type UploadedFile = {
 
 export default function FileUpload({
   recordId,
+  companyId,
   files = [],
   onUpload,
 }: {
   recordId?: string;
+  companyId?: string;
   files?: UploadedFile[];
   onUpload?: (file: UploadedFile) => void;
 }) {
@@ -31,6 +33,7 @@ export default function FileUpload({
       const fd = new FormData();
       fd.append("file", file);
       if (recordId) fd.append("recordId", recordId);
+      if (companyId) fd.append("companyId", companyId);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       if (res.ok) {
         const data: UploadedFile = await res.json();

@@ -196,7 +196,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                   </select>
                 </div>
               </div>
-              <FileUpload recordId={pendingRecordId || undefined} files={[]} onUpload={f => setUploadedFiles(p => [...p, f])} />
+              <FileUpload recordId={pendingRecordId || undefined} companyId={companyId} files={[]} onUpload={f => setUploadedFiles(p => [...p, f])} />
               <div className="flex gap-2 pt-4">
                 <motion.button
                   onClick={save} disabled={saving}

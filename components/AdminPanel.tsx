@@ -1,5 +1,6 @@
 "use client";
 import { sanitizeUrl } from "@/lib/sanitizeUrl";
+import { formatPhone as formatPhoneNum } from "@/lib/formatPhone";
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppUser, SectionId, ALL_SECTIONS, Company } from "@/lib/auth";
@@ -801,19 +802,19 @@ export default function AdminPanel({ onExit }: Props) {
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, maxWidth: 600, marginBottom: 16 }}>
                             <div>
                               <label style={{ fontSize: 10, color: "#55556a", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>Телефон для связи</label>
-                              <input type="text" value={subPhoneEdit} onChange={e => setSubPhoneEdit(e.target.value)} style={inp} placeholder="+7 (999) 000-00-00" />
+                              <input type="tel" inputMode="tel" value={subPhoneEdit} onChange={e => setSubPhoneEdit(formatPhoneNum(e.target.value))} style={inp} placeholder="+7 (999) 000-00-00" maxLength={18} />
                             </div>
                             <div>
                               <label style={{ fontSize: 10, color: "#55556a", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>Номер карты для оплаты</label>
-                              <input type="text" value={subCardEdit} onChange={e => setSubCardEdit(e.target.value)} style={inp} placeholder="2200 0000 0000 0000" />
+                              <input type="text" inputMode="numeric" value={subCardEdit} onChange={e => { const d = e.target.value.replace(/\D/g, '').slice(0, 16); setSubCardEdit(d.replace(/(.{4})/g, '$1 ').trim()); }} style={inp} placeholder="2200 0000 0000 0000" maxLength={19} />
                             </div>
                             <div>
                               <label style={{ fontSize: 10, color: "#55556a", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>Стоимость за 1 объект</label>
-                              <input type="text" value={subPriceEdit} onChange={e => setSubPriceEdit(e.target.value)} style={inp} placeholder="9 990 ₽" />
+                              <input type="text" inputMode="numeric" value={subPriceEdit} onChange={e => setSubPriceEdit(e.target.value.replace(/[^\d\s₽.]/g, ''))} style={inp} placeholder="9 990 ₽" />
                             </div>
                             <div>
                               <label style={{ fontSize: 10, color: "#55556a", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>Тариф хранилища (₽ за 1 ГБ)</label>
-                              <input type="text" value={storagePriceEdit} onChange={e => setStoragePriceEdit(e.target.value)} style={inp} placeholder="0.07" />
+                              <input type="text" inputMode="decimal" value={storagePriceEdit} onChange={e => setStoragePriceEdit(e.target.value.replace(/[^\d.]/g, ''))} style={inp} placeholder="0.07" />
                             </div>
                           </div>
                           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={handleSavePaymentSettings}

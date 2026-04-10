@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatPhone } from "@/lib/formatPhone";
 
 // ----- Premium 3D Glass card (Behance style) -----
 function GlassCard({ children, maxW = 420, accent = "#e63946", bgNode }: {
@@ -202,7 +203,7 @@ export function RequestModal({ isOpen, onClose, userId, type = "connect", compan
               </div>
               <div>
                 <label style={labelStyle}>📞 &nbsp;Телефон</label>
-                <input type="text" value={reqPhone} onChange={e => { setReqPhone(e.target.value); setReqError(""); }} placeholder="+7 (999) 000-00-00" style={{...iInput(!!reqError), padding: "12px 16px"}} />
+                <input type="tel" inputMode="tel" value={reqPhone} onChange={e => { setReqPhone(formatPhone(e.target.value)); setReqError(""); }} placeholder="+7 (999) 000-00-00" maxLength={18} style={{...iInput(!!reqError), padding: "12px 16px"}} />
               </div>
               
               {type !== "subscription" && (
