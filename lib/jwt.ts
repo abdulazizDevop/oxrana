@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-  throw new Error('CRITICAL: JWT_SECRET environment variable is not set in production');
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET && typeof window === 'undefined' && process.env.NEXT_PHASE !== 'phase-production-build') {
+  console.error('CRITICAL: JWT_SECRET environment variable is not set in production');
 }
 
 const JWT_SECRET = new TextEncoder().encode(

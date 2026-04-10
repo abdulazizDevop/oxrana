@@ -4,6 +4,8 @@ RUN npm install -g bun
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY . .
+ENV JWT_SECRET=build_time_placeholder
+ENV NODE_ENV=production
 RUN bun run build
 
 FROM node:20-alpine
