@@ -110,22 +110,22 @@ export default function FinesSection({ city, companyId }: { city: string; compan
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Охранник</label>
                   <input placeholder="ФИО охранника" value={form.guard} onChange={e => setForm({ ...form, guard: e.target.value })}
-                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm placeholder-white/20 outline-none transition-all" />
+                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Нарушение</label>
                   <input placeholder="Описание нарушения" value={form.violation} onChange={e => setForm({ ...form, violation: e.target.value })}
-                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm placeholder-white/20 outline-none transition-all" />
+                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Сумма (руб)</label>
                   <input type="number" min="0" placeholder="5000" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })}
-                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm placeholder-white/20 outline-none transition-all" />
+                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Статус</label>
                   <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
-                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm outline-none transition-all appearance-none cursor-pointer">
+                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all appearance-none cursor-pointer">
                     <option value="pending" className="bg-[#0a0a0f]">Ожидает</option>
                     <option value="disputed" className="bg-[#0a0a0f]">Оспаривается</option>
                     <option value="paid" className="bg-[#0a0a0f]">Оплачен</option>
@@ -134,17 +134,17 @@ export default function FinesSection({ city, companyId }: { city: string; compan
                 <div className="space-y-1.5 col-span-2">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Примечания</label>
                   <input placeholder="Доп. информация" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
-                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm placeholder-white/20 outline-none transition-all" />
+                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
                 </div>
               </div>
               <FileUpload recordId={pendingId || undefined} files={[]} />
               <div className="flex gap-2 pt-4">
                 <motion.button onClick={save} disabled={saving} whileHover={{ scale: saving ? 1 : 1.02 }} whileTap={{ scale: saving ? 1 : 0.97 }}
-                  className="flex-1 py-3 bg-white text-black rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all">
+                  className="flex-1 py-4 bg-white text-black rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all">
                   {saving ? <Loader2 size={14} className="animate-spin" /> : null} Сохранить запись
                 </motion.button>
                 <motion.button onClick={cancelForm} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                  className="px-5 py-3 bg-white/4 border border-white/8 text-white/50 rounded-xl text-sm hover:text-white/80 transition-all">Отмена</motion.button>
+                  className="px-5 py-4 bg-white/4 border border-white/8 text-white/50 rounded-2xl text-[15px] hover:text-white/80 transition-all">Отмена</motion.button>
               </div>
             </motion.div>
           </div>

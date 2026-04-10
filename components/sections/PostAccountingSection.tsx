@@ -291,7 +291,7 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
                     onChange={e => setNewName(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && addEmployee()}
                     placeholder="Например: Иванов Иван"
-                    className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 outline-none focus:border-white/25"
+                    className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-5 py-4 text-[15px] text-white placeholder:text-white/20 outline-none focus:border-white/25"
                   />
                 </div>
                 <div>
@@ -301,7 +301,7 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
                     onChange={e => setNewPost(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && addEmployee()}
                     placeholder="Пост №1"
-                    className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 outline-none focus:border-white/25"
+                    className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-5 py-4 text-[15px] text-white placeholder:text-white/20 outline-none focus:border-white/25"
                   />
                 </div>
                 <div className="flex gap-3 pt-1">

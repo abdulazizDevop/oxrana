@@ -6,7 +6,9 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     const { applicationId, cityId, objectName, address, login, password, userId: existingUserId, type, companyId: existingCompanyId } = data;
-    
+
+    if (!applicationId) return NextResponse.json({ error: 'applicationId required' }, { status: 400 });
+
     // 1. Handle Subscription Extension
     if (type === 'subscription' && existingCompanyId) {
       const subscriptionEndsAt = new Date();
@@ -43,6 +45,10 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Default: Create New User and Company (Existing logic)
+    if (!objectName?.trim()) return NextResponse.json({ error: 'objectName required' }, { status: 400 });
+    if (!password?.trim()) return NextResponse.json({ error: 'password required' }, { status: 400 });
+    if (!login?.trim()) return NextResponse.json({ error: 'login required' }, { status: 400 });
+    if (!cityId) return NextResponse.json({ error: 'cityId required' }, { status: 400 });
     const companyId = objectName.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now();
     const subscriptionEndsAt = new Date();
     subscriptionEndsAt.setDate(subscriptionEndsAt.getDate() + 3); // 3 days trial

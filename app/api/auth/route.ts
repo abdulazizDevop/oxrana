@@ -12,41 +12,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Слишком много попыток входа, подождите минуту" }, { status: 429 });
   }
 
+  try {
   const { login, password } = await req.json();
 
   if (!login || !password) {
     return NextResponse.json({ error: 'Заполните все поля' }, { status: 400 });
   }
 
-  // Hardcoded Admin login check
-  if (login.trim() === 'visrail' && password === '5051') {
-    const adminUser = {
-      id: 'admin_visrail',
-      name: 'Администратор Visrail',
-      role: 'admin',
-      profession: 'Главный администратор',
-      login: 'visrail',
-      allowed_sections: [],
-      allowed_cities: [],
-      allowed_companies: [],
-      is_admin: true,
-    };
-    
-    const token = await signToken(adminUser);
-    const response = NextResponse.json(adminUser);
-    response.cookies.set({
-      name: 'auth_token',
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      path: '/',
-    });
-    return response;
-  }
-
-  // Admin login check (via environment variables)
+  // Admin login check (via environment variables only)
   const envAdminLogin = process.env.ADMIN_LOGIN;
   const envAdminPassword = process.env.ADMIN_PASSWORD;
 
@@ -140,6 +113,10 @@ export async function POST(req: NextRequest) {
     path: '/',
   });
   return response;
+  } catch (e: any) {
+    console.error('Auth error:', e?.message);
+    return NextResponse.json({ error: 'Ошибка авторизации' }, { status: 500 });
+  }
 }
 
 export async function GET(req: NextRequest) {

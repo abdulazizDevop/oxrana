@@ -1,27 +1,36 @@
-// GET /api/cities — список городов
-// POST /api/cities — добавить город
-// DELETE /api/cities?id=xxx — удалить город
-
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
 export async function GET() {
-  const res = await query('SELECT * FROM cities ORDER BY is_default DESC, name ASC');
-  return NextResponse.json(res.rows);
+  try {
+    const res = await query('SELECT * FROM cities ORDER BY is_default DESC, name ASC');
+    return NextResponse.json(res.rows);
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const { id, name } = await req.json();
-  const res = await query(
-    'INSERT INTO cities (id, name, is_default) VALUES ($1, $2, false) ON CONFLICT (id) DO NOTHING RETURNING *',
-    [id, name]
-  );
-  return NextResponse.json(res.rows[0]);
+  try {
+    const { id, name } = await req.json();
+    if (!id || !name) return NextResponse.json({ error: 'id and name required' }, { status: 400 });
+    const res = await query(
+      'INSERT INTO cities (id, name, is_default) VALUES ($1, $2, false) ON CONFLICT (id) DO NOTHING RETURNING *',
+      [id, name]
+    );
+    return NextResponse.json(res.rows[0]);
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get('id');
-  await query('DELETE FROM cities WHERE id = $1 AND is_default = false', [id]);
-  return NextResponse.json({ ok: true });
+  try {
+    const id = req.nextUrl.searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+    await query('DELETE FROM cities WHERE id = $1 AND is_default = false', [id]);
+    return NextResponse.json({ ok: true });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
 }

@@ -54,7 +54,7 @@ export default function PostsSection({ city, companyId }: { city: string; compan
       <div className="flex items-center justify-between gap-3 pb-4 border-b border-white/6">
         <h2 className="text-lg sm:text-xl font-semibold text-white truncate">Порядок на постах</h2>
         <motion.button onClick={openForm} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 500, damping: 20 }}
-          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-sm font-semibold border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-all">
+          className="flex items-center gap-2 px-7 py-3.5 rounded-2xl text-[15px] font-semibold border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-all">
           <Plus size={15} strokeWidth={2.5} /><span>Добавить</span>
         </motion.button>
       </div>

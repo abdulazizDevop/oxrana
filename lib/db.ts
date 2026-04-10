@@ -67,7 +67,8 @@ export async function initDb() {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         city TEXT NOT NULL DEFAULT '',
         complex TEXT,
-        name TEXT,
+        post_name TEXT,
+        guard TEXT,
         status TEXT DEFAULT 'active',
         notes TEXT,
         created_at TIMESTAMPTZ DEFAULT now()
@@ -76,7 +77,8 @@ export async function initDb() {
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         city TEXT NOT NULL DEFAULT '',
         complex TEXT,
-        title TEXT,
+        violation_type TEXT,
+        description TEXT,
         photo_url TEXT,
         status TEXT DEFAULT 'pending',
         notes TEXT,
@@ -112,24 +114,31 @@ export async function initDb() {
         notes TEXT,
         created_at TIMESTAMPTZ DEFAULT now()
       );
-      CREATE TABLE IF NOT EXISTS requests (
+      CREATE TABLE IF NOT EXISTS tmc_requests (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        city TEXT NOT NULL DEFAULT '',
-        complex TEXT,
-        requester TEXT,
-        description TEXT,
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT NOT NULL DEFAULT '',
+        requester_name TEXT,
+        item_name TEXT,
+        quantity INTEGER DEFAULT 1,
         status TEXT DEFAULT 'pending',
         notes TEXT,
         created_at TIMESTAMPTZ DEFAULT now()
       );
-      CREATE TABLE IF NOT EXISTS schedules (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        city TEXT NOT NULL DEFAULT '',
-        complex TEXT,
-        employee TEXT,
-        schedule_date DATE,
-        shift_type TEXT,
-        notes TEXT,
+      CREATE TABLE IF NOT EXISTS work_schedules (
+        id TEXT PRIMARY KEY,
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT NOT NULL DEFAULT '',
+        employee_name TEXT,
+        role TEXT DEFAULT '',
+        schedule_type TEXT DEFAULT 'vahta',
+        work_start DATE,
+        work_end DATE,
+        rest_start DATE,
+        rest_end DATE,
+        shift_hours INTEGER DEFAULT 24,
+        rest_hours INTEGER DEFAULT 72,
+        note TEXT DEFAULT '',
         created_at TIMESTAMPTZ DEFAULT now()
       );
       CREATE TABLE IF NOT EXISTS cities (
@@ -190,6 +199,177 @@ export async function initDb() {
         created_at TIMESTAMPTZ DEFAULT now()
       );
       
+      CREATE TABLE IF NOT EXISTS section_records (
+        id TEXT PRIMARY KEY,
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT NOT NULL DEFAULT '',
+        section TEXT NOT NULL DEFAULT '',
+        data JSONB DEFAULT '{}',
+        created_by TEXT,
+        updated_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS record_files (
+        id TEXT PRIMARY KEY,
+        record_id TEXT NOT NULL,
+        file_name TEXT,
+        file_path TEXT,
+        file_type TEXT,
+        file_size BIGINT DEFAULT 0,
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS cameras (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT NOT NULL DEFAULT '',
+        name TEXT,
+        url TEXT,
+        type TEXT DEFAULT 'iframe',
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS conferences (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT,
+        created_by TEXT NOT NULL,
+        created_by_name TEXT NOT NULL,
+        status TEXT DEFAULT 'active',
+        jitsi_room TEXT,
+        ended_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS conference_invitations (
+        id TEXT PRIMARY KEY,
+        conference_id TEXT NOT NULL,
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT,
+        seen_by TEXT[] DEFAULT '{}',
+        invited_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS conference_messages (
+        id TEXT PRIMARY KEY,
+        conference_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        user_name TEXT NOT NULL,
+        user_role TEXT DEFAULT '',
+        message TEXT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS transport (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        city TEXT NOT NULL DEFAULT '',
+        complex TEXT,
+        plate_number TEXT,
+        direction TEXT,
+        driver_name TEXT,
+        purpose TEXT,
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS transport_vehicles (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT NOT NULL DEFAULT '',
+        list_type TEXT NOT NULL DEFAULT '',
+        plate_number TEXT NOT NULL,
+        driver_name TEXT DEFAULT '',
+        description TEXT DEFAULT '',
+        created_by TEXT DEFAULT '',
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS transport_log (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT NOT NULL DEFAULT '',
+        vehicle_id UUID,
+        plate_number TEXT NOT NULL,
+        driver_name TEXT DEFAULT '',
+        list_type TEXT NOT NULL DEFAULT '',
+        action TEXT NOT NULL,
+        logged_by TEXT DEFAULT '',
+        logged_by_role TEXT DEFAULT '',
+        note TEXT DEFAULT '',
+        logged_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS face_check_logs (
+        id TEXT PRIMARY KEY,
+        user_id TEXT,
+        user_name TEXT NOT NULL,
+        user_login TEXT NOT NULL,
+        photo_url TEXT,
+        check_type TEXT DEFAULT 'login',
+        status TEXT DEFAULT 'approved',
+        city TEXT DEFAULT '',
+        company_id TEXT DEFAULT '',
+        ip_address TEXT DEFAULT '',
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS admin_log (
+        id TEXT PRIMARY KEY,
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT NOT NULL DEFAULT '',
+        actor_name TEXT NOT NULL,
+        actor_role TEXT DEFAULT '',
+        action TEXT NOT NULL,
+        section TEXT DEFAULT '',
+        detail TEXT DEFAULT '',
+        logged_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS admin_settings (
+        id TEXT PRIMARY KEY,
+        value TEXT,
+        updated_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS admin_expenses (
+        id TEXT PRIMARY KEY,
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT NOT NULL DEFAULT '',
+        expense_name TEXT NOT NULL,
+        advance_amount NUMERIC DEFAULT 0,
+        total_amount NUMERIC DEFAULT 0,
+        comment TEXT DEFAULT '',
+        created_by TEXT DEFAULT '',
+        created_by_role TEXT DEFAULT '',
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS emergency_alerts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        city_id TEXT NOT NULL DEFAULT '',
+        company_id TEXT NOT NULL DEFAULT '',
+        triggered_by TEXT NOT NULL,
+        triggered_by_role TEXT DEFAULT '',
+        message TEXT DEFAULT '',
+        resolved_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS push_subscriptions (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id TEXT,
+        user_name TEXT,
+        is_admin BOOLEAN DEFAULT false,
+        endpoint TEXT UNIQUE NOT NULL,
+        p256dh TEXT DEFAULT '',
+        auth TEXT DEFAULT '',
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS role_instructions (
+        id TEXT PRIMARY KEY,
+        role_key TEXT UNIQUE NOT NULL,
+        role_label TEXT DEFAULT '',
+        content TEXT DEFAULT '',
+        updated_by TEXT DEFAULT '',
+        updated_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE TABLE IF NOT EXISTS user_logins (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        login TEXT UNIQUE NOT NULL,
+        plain_password TEXT,
+        password_hash TEXT NOT NULL,
+        label TEXT DEFAULT '',
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+
       -- Add missing columns to existing tables if needed
       ALTER TABLE companies ADD COLUMN IF NOT EXISTS owner_id TEXT;
       ALTER TABLE companies ADD COLUMN IF NOT EXISTS subscription_ends_at TIMESTAMPTZ;

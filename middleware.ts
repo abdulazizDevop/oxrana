@@ -32,7 +32,6 @@ function applySecurityHeaders(response: NextResponse, cspHeader: string) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval';
@@ -112,17 +111,15 @@ export async function middleware(request: NextRequest) {
   }
 
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-nonce', nonce);
   requestHeaders.set('Content-Security-Policy', cspHeader);
 
-  // Security Headers for frontend
   const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     }
   });
-  
-  return applySecurityHeaders(response, nonce, cspHeader);
+
+  return applySecurityHeaders(response, cspHeader);
 }
 
 export const config = {

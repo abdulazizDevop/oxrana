@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { AppUser, Company } from "@/lib/auth";
@@ -140,6 +140,7 @@ export default function Home() {
   const [pendingUser, setPendingUser] = useState<AppUser | null>(null);
   const [login, setLogin] = useState("");
   const [userPass, setUserPass] = useState("");
+  const passRef = useRef<HTMLInputElement>(null);
   const [userError, setUserError] = useState("");
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -215,7 +216,7 @@ export default function Home() {
         allowedSections: d.allowed_sections || [],
         allowedCities: d.allowed_cities || [],
         allowedCompanies: d.allowed_companies || [],
-        createdAt: d.created_at ? new Date(d.created_at).getTime() : undefined,
+        created_at: d.created_at,
       };
       setUserError("");
       
@@ -270,7 +271,7 @@ export default function Home() {
         allowedSections: data.allowed_sections || [],
         allowedCities: data.allowed_cities || [],
         allowedCompanies: data.allowed_companies || [],
-        createdAt: data.created_at ? new Date(data.created_at).getTime() : Date.now(),
+        created_at: data.created_at,
       };
       setCurrentUser(user); setShowInstructions(true);
     } catch (e) {
@@ -425,12 +426,12 @@ export default function Home() {
                       <label style={labelStyle}>🗝️ &nbsp;Логин (или Email)</label>
                       <input type="text" value={login}
                         onChange={e => { setLogin(e.target.value); setUserError(""); }}
-                        onKeyDown={e => e.key === "Enter" && handleUserLogin()}
+                        onKeyDown={e => { if (e.key === "Enter") { if (!userPass) { e.preventDefault(); passRef.current?.focus(); } else { handleUserLogin(); } } }}
                         placeholder="Ваш логин" style={iInput(!!userError)} />
                     </div>
                     <div>
                       <label style={labelStyle}>🔒 &nbsp;Пароль</label>
-                      <input type="password" value={userPass}
+                      <input ref={passRef} type="password" value={userPass}
                         onChange={e => { setUserPass(e.target.value); setUserError(""); }}
                         onKeyDown={e => e.key === "Enter" && handleUserLogin()}
                         placeholder="••••••" style={{ ...iInput(!!userError), letterSpacing: "0.2em" }} />

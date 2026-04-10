@@ -66,6 +66,7 @@ export async function DELETE(req: NextRequest) {
   try {
     await initDb();
     const id = req.nextUrl.searchParams.get("id");
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     await query(`DELETE FROM post_accounting WHERE id=$1`, [id]);
     return NextResponse.json({ ok: true });
   } catch (e: any) {

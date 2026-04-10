@@ -272,7 +272,7 @@ export default function InventorySection({
                       placeholder="Рация, жилет, фонарь..."
                       value={form.item_name}
                       onChange={e => setForm({ ...form, item_name: e.target.value })}
-                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm placeholder-white/20 outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -283,7 +283,7 @@ export default function InventorySection({
                       type="number" min="1"
                       value={form.quantity}
                       onChange={e => setForm({ ...form, quantity: e.target.value })}
-                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -291,7 +291,7 @@ export default function InventorySection({
                     <select
                       value={form.status}
                       onChange={e => setForm({ ...form, status: e.target.value })}
-                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm outline-none transition-all appearance-none cursor-pointer"
+                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all appearance-none cursor-pointer"
                     >
                       <option value="ok" className="bg-[#0a0a0f]">На месте</option>
                       <option value="damaged" className="bg-[#0a0a0f]">Повреждено</option>
@@ -306,7 +306,7 @@ export default function InventorySection({
                       placeholder="Доп. информация"
                       value={form.notes}
                       onChange={e => setForm({ ...form, notes: e.target.value })}
-                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm placeholder-white/20 outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -315,7 +315,7 @@ export default function InventorySection({
                   <motion.button
                     onClick={save} disabled={saving}
                     whileHover={{ scale: saving ? 1 : 1.02 }} whileTap={{ scale: saving ? 1 : 0.97 }}
-                    className="flex-1 py-3 bg-white text-black rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-50"
+                    className="flex-1 py-4 bg-white text-black rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-50"
                   >
                     {saving ? <Loader2 size={14} className="animate-spin" /> : null}
                     Сохранить запись
@@ -323,7 +323,7 @@ export default function InventorySection({
                   <motion.button
                     onClick={cancelForm}
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                    className="px-5 py-3 bg-white/4 border border-white/8 text-white/50 rounded-xl text-sm hover:text-white/80 transition-all"
+                    className="px-5 py-4 bg-white/4 border border-white/8 text-white/50 rounded-2xl text-[15px] hover:text-white/80 transition-all"
                   >
                     Отмена
                   </motion.button>
@@ -517,7 +517,7 @@ export default function InventorySection({
                       placeholder="Что именно нужно?"
                       value={tmcForm.item_name}
                       onChange={e => setTmcForm({ ...tmcForm, item_name: e.target.value })}
-                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -526,7 +526,7 @@ export default function InventorySection({
                       type="number" min="1"
                       value={tmcForm.quantity}
                       onChange={e => setTmcForm({ ...tmcForm, quantity: e.target.value })}
-                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm outline-none transition-all"
+                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -535,7 +535,7 @@ export default function InventorySection({
                       placeholder="Зачем это нужно или подробности..."
                       value={tmcForm.notes}
                       onChange={e => setTmcForm({ ...tmcForm, notes: e.target.value })}
-                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm outline-none transition-all min-h-[80px] resize-none"
+                      className="w-full bg-white/5 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all min-h-[80px] resize-none"
                     />
                   </div>
                 </div>

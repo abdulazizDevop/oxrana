@@ -1,18 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Pool } from "pg";
+import pool from "@/lib/db";
 import webpush from "web-push";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-webpush.setVapidDetails(
-  process.env.VAPID_EMAIL || "mailto:admin@jktracker.ru",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
-  process.env.VAPID_PRIVATE_KEY || ""
-);
+if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    process.env.VAPID_EMAIL || "mailto:admin@jktracker.ru",
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { title, body: msgBody, urgent, adminOnly } = body;
+
+  if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+    return NextResponse.json({ error: "VAPID keys not configured" }, { status: 503 });
+  }
 
   try {
     let query = "SELECT * FROM push_subscriptions";

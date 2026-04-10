@@ -51,7 +51,7 @@ export default function PhotoReportSection({ city, companyId }: { city: string; 
       <div className="flex items-center justify-between gap-3 pb-4 border-b border-white/6">
         <h2 className="text-lg sm:text-xl font-semibold text-white truncate">Фото отчёт / Нарушение</h2>
         <motion.button onClick={openForm} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 500, damping: 20 }}
-          className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl text-sm font-semibold border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-all">
+          className="flex items-center gap-2 px-7 py-3.5 rounded-2xl text-[15px] font-semibold border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-all">
           <Plus size={15} strokeWidth={2.5} /><span>Добавить</span>
         </motion.button>
       </div>
@@ -81,29 +81,29 @@ export default function PhotoReportSection({ city, companyId }: { city: string; 
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Тип нарушения</label>
                   <select value={form.violation_type} onChange={e => setForm({ ...form, violation_type: e.target.value })}
-                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm outline-none transition-all appearance-none cursor-pointer">
+                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all appearance-none cursor-pointer">
                     {VIOLATION_TYPES.map(t => <option key={t} className="bg-[#0a0a0f]">{t}</option>)}
                   </select>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Место</label>
                   <input placeholder="Укажите место" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })}
-                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm placeholder-white/20 outline-none transition-all" />
+                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
                 </div>
                 <div className="space-y-1.5 col-span-2">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Описание</label>
                   <textarea placeholder="Подробное описание нарушения" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={3}
-                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm placeholder-white/20 outline-none transition-all resize-none" />
+                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all resize-none" />
                 </div>
               </div>
               <FileUpload recordId={pendingId || undefined} files={[]} />
               <div className="flex gap-2 pt-4">
                 <motion.button onClick={save} disabled={saving} whileHover={{ scale: saving ? 1 : 1.02 }} whileTap={{ scale: saving ? 1 : 0.97 }}
-                  className="flex-1 py-3 bg-white text-black rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all">
+                  className="flex-1 py-4 bg-white text-black rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all">
                   {saving ? <Loader2 size={14} className="animate-spin" /> : null} Сохранить запись
                 </motion.button>
                 <motion.button onClick={cancelForm} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                  className="px-5 py-3 bg-white/4 border border-white/8 text-white/50 rounded-xl text-sm hover:text-white/80 transition-all">Отмена</motion.button>
+                  className="px-5 py-4 bg-white/4 border border-white/8 text-white/50 rounded-2xl text-[15px] hover:text-white/80 transition-all">Отмена</motion.button>
               </div>
             </motion.div>
           </div>

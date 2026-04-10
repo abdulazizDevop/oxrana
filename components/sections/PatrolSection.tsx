@@ -109,7 +109,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 500, damping: 20 }}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-all flex-shrink-0"
+          className="flex items-center gap-2 px-7 py-3.5 rounded-2xl text-[15px] font-semibold border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-all flex-shrink-0"
         >
           <Plus size={15} strokeWidth={2.5} />
           <span>Добавить</span>
@@ -164,7 +164,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                       placeholder={f.placeholder}
                       value={(form as any)[f.key]}
                       onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                      className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm placeholder-white/20 outline-none transition-all"
+                      className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all"
                     />
                   </div>
                 ))}
@@ -173,7 +173,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                   <select
                     value={form.status}
                     onChange={e => setForm({ ...form, status: e.target.value })}
-                    className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm outline-none transition-all appearance-none cursor-pointer"
+                    className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all appearance-none cursor-pointer"
                   >
                     <option value="pending" className="bg-[#0a0a0f]">Ожидает</option>
                     <option value="in_progress" className="bg-[#0a0a0f]">В обходе</option>
@@ -186,7 +186,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                 <motion.button
                   onClick={save} disabled={saving}
                   whileHover={{ scale: saving ? 1 : 1.02 }} whileTap={{ scale: saving ? 1 : 0.97 }}
-                  className="flex-1 py-3 bg-white text-black rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-50"
+                  className="flex-1 py-4 bg-white text-black rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-50"
                 >
                   {saving && <Loader2 size={14} className="animate-spin" />}
                   Сохранить запись
@@ -194,7 +194,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                 <motion.button
                   onClick={cancelForm}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                  className="px-5 py-3 bg-white/[0.04] border border-white/8 text-white/50 rounded-xl text-sm hover:text-white/80 transition-all"
+                  className="px-6 py-4 bg-white/[0.04] border border-white/8 text-white/50 rounded-2xl text-[15px] hover:text-white/80 transition-all"
                 >
                   Отмена
                 </motion.button>

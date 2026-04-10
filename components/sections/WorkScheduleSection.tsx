@@ -141,7 +141,7 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
     pending: schedules.filter(s => getStatusInfo(s).label === "Ожидает").length,
   };
 
-  const inputCls = "w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-4 py-3 text-sm placeholder-white/20 outline-none transition-all";
+  const inputCls = "w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all";
 
   return (
     <div className="flex flex-col gap-8">
@@ -153,7 +153,7 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
         </div>
         <motion.button onClick={() => setShowForm(!showForm)}
           whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-all">
+          className="flex items-center gap-2 px-7 py-3.5 rounded-2xl text-[15px] font-semibold border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-all">
           <Plus size={15} strokeWidth={2.5} />
           <span>Добавить</span>
         </motion.button>
@@ -290,12 +290,12 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
                 <div className="flex gap-2 pt-1">
                   <motion.button onClick={save} disabled={saving || !form.employeeName.trim() || !form.workStart || !form.workEnd}
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                    className="flex-1 py-3 bg-white text-black rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-40">
+                    className="flex-1 py-4 bg-white text-black rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-40">
                     {saving ? <Loader2 size={14} className="animate-spin" /> : null}
                     Сохранить
                   </motion.button>
                   <motion.button onClick={() => setShowForm(false)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                    className="px-5 py-3 bg-white/4 border border-white/8 text-white/50 rounded-xl text-sm hover:text-white/80 transition-all">
+                    className="px-5 py-4 bg-white/4 border border-white/8 text-white/50 rounded-2xl text-[15px] hover:text-white/80 transition-all">
                     Отмена
                   </motion.button>
                 </div>

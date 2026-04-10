@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
@@ -23,12 +22,11 @@ export const viewport: Viewport = {
   themeColor: "#e63946",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const nonce = (await headers()).get("x-nonce") || "";
   return (
     <html lang="ru">
       <head>
@@ -36,12 +34,12 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-          <meta name="apple-mobile-web-app-title" content="Глаза ЧОПа" />
+        <meta name="apple-mobile-web-app-title" content="Глаза ЧОПа" />
         <meta name="theme-color" content="#e63946" />
       </head>
       <body>
         {children}
-        <script nonce={nonce} dangerouslySetInnerHTML={{
+        <script dangerouslySetInnerHTML={{
           __html: `
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', function() {

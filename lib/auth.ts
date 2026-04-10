@@ -11,13 +11,17 @@ export interface AppUser {
   login: string;
   password: string;
   is_admin?: boolean;
-  allowedSections: SectionId[];
+  // DB column names (snake_case)
   allowed_sections?: SectionId[];
   allowed_cities?: string[];
   allowed_companies?: string[];
+  // Frontend mapped names (camelCase)
+  allowedSections: SectionId[];
   allowedCities: string[];
   allowedCompanies: string[];
-  createdAt?: number;
+  email?: string;
+  phone?: string;
+  created_at?: string;
 }
 
 export interface Company {

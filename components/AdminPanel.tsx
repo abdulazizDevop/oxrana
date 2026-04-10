@@ -39,13 +39,13 @@ const DEFAULT_CITIES = [
 ];
 
 interface Props { onExit: () => void; }
-type Tab = "users" | "companies" | "cameras" | "transport_log" | "instructions" | "logins" | "applications"
+type Tab = "users" | "companies" | "cameras" | "transport_log" | "instructions" | "logins" | "applications" | "subscriptions"
   | "patrol" | "shift" | "posts" | "photo" | "apartment" | "inventory" | "transport" | "schedule" | "fines" | "expenses" | "work_schedule" | "admin_log" | "conference";
 
 const inp: React.CSSProperties = {
   width: "100%", background: "rgba(255,255,255,0.05)",
-  border: "1px solid rgba(255,255,255,0.1)", borderRadius: 11,
-  padding: "11px 13px", fontSize: 14, color: "#e8e8f0", outline: "none", boxSizing: "border-box"
+  border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14,
+  padding: "13px 16px", fontSize: 15, color: "#e8e8f0", outline: "none", boxSizing: "border-box"
 };
 
 type LogEntry = {
@@ -567,10 +567,10 @@ export default function AdminPanel({ onExit }: Props) {
             )}
             <motion.aside
               key="sidebar"
-              initial={isMobile ? { x: -300 } : false}
-              animate={{ x: 0 }}
-              exit={isMobile ? { x: -300 } : { x: 0 }}
-              transition={{ type: "spring", stiffness: 340, damping: 32 }}
+              initial={{ x: -280, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -280, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
               style={{
                 width: 272,
                 background: "rgba(10,10,18,0.98)",
@@ -608,13 +608,18 @@ export default function AdminPanel({ onExit }: Props) {
                   </div>
                   <AnimatePresence initial={false}>
                     {openGroups.plan && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
-                        {PLAN_TABS.map(t => (
-                          <motion.button key={t.id} whileHover={{ x: 2 }} whileTap={{ scale: 0.97 }}
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: "hidden" }}>
+                        {PLAN_TABS.map((t, i) => (
+                          <motion.button key={t.id}
+                            initial={{ opacity: 0, x: -12 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.02, duration: 0.15 }}
+                            whileHover={{ x: 4, backgroundColor: tab === t.id ? "rgba(230,57,70,0.15)" : "rgba(255,255,255,0.04)" }}
+                            whileTap={{ scale: 0.97 }}
                             onClick={() => { setTab(t.id); setSelectedUser(null); if (isMobile) setSidebarOpen(false); }}
-                            style={{ width: "100%", display: "flex", alignItems: "center", gap: 11, padding: "11px 14px", borderRadius: 13, border: "none", cursor: "pointer", marginBottom: 2, background: tab === t.id ? "rgba(230,57,70,0.1)" : "transparent", borderLeft: `3px solid ${tab === t.id ? "#e63946" : "transparent"}`, textAlign: "left", transition: "all 0.18s" }}>
-                            <span style={{ fontSize: 17 }}>{t.icon}</span>
-                            <span style={{ fontSize: 14, fontWeight: tab === t.id ? 600 : 400, color: tab === t.id ? "#f0f0fa" : "#505065" }}>{t.label}</span>
+                            style={{ width: "100%", display: "flex", alignItems: "center", gap: 11, padding: "12px 14px", borderRadius: 13, border: "none", cursor: "pointer", marginBottom: 2, background: tab === t.id ? "rgba(230,57,70,0.1)" : "transparent", borderLeft: `3px solid ${tab === t.id ? "#e63946" : "transparent"}`, textAlign: "left", transition: "background 0.18s" }}>
+                            <span style={{ fontSize: 18, filter: tab === t.id ? "none" : "grayscale(0.5)", transition: "filter 0.2s" }}>{t.icon}</span>
+                            <span style={{ fontSize: 14, fontWeight: tab === t.id ? 700 : 400, color: tab === t.id ? "#f0f0fa" : "#606078", transition: "color 0.2s" }}>{t.label}</span>
                           </motion.button>
                         ))}
                       </motion.div>
@@ -631,13 +636,18 @@ export default function AdminPanel({ onExit }: Props) {
                   </div>
                   <AnimatePresence initial={false}>
                     {openGroups.management && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
-                        {MGMT_TABS.map(t => (
-                          <motion.button key={t.id} whileHover={{ x: 2 }} whileTap={{ scale: 0.97 }}
+                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: "hidden" }}>
+                        {MGMT_TABS.map((t, i) => (
+                          <motion.button key={t.id}
+                            initial={{ opacity: 0, x: -12 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.02, duration: 0.15 }}
+                            whileHover={{ x: 4, backgroundColor: tab === t.id ? "rgba(79,142,247,0.15)" : "rgba(255,255,255,0.04)" }}
+                            whileTap={{ scale: 0.97 }}
                             onClick={() => { setTab(t.id); setSelectedUser(null); if (t.id === "companies") { setSelectedCity(""); setSelectedCompany(null); } if (isMobile) setSidebarOpen(false); }}
-                            style={{ width: "100%", display: "flex", alignItems: "center", gap: 11, padding: "11px 14px", borderRadius: 13, border: "none", cursor: "pointer", marginBottom: 2, background: tab === t.id ? "rgba(79,142,247,0.1)" : "transparent", borderLeft: `3px solid ${tab === t.id ? "#4f8ef7" : "transparent"}`, textAlign: "left", transition: "all 0.18s" }}>
-                            <span style={{ fontSize: 17 }}>{t.icon}</span>
-                            <span style={{ fontSize: 14, fontWeight: tab === t.id ? 600 : 400, color: tab === t.id ? "#f0f0fa" : "#505065" }}>{t.label}</span>
+                            style={{ width: "100%", display: "flex", alignItems: "center", gap: 11, padding: "12px 14px", borderRadius: 13, border: "none", cursor: "pointer", marginBottom: 2, background: tab === t.id ? "rgba(79,142,247,0.1)" : "transparent", borderLeft: `3px solid ${tab === t.id ? "#4f8ef7" : "transparent"}`, textAlign: "left", transition: "background 0.18s" }}>
+                            <span style={{ fontSize: 18, filter: tab === t.id ? "none" : "grayscale(0.5)", transition: "filter 0.2s" }}>{t.icon}</span>
+                            <span style={{ fontSize: 14, fontWeight: tab === t.id ? 700 : 400, color: tab === t.id ? "#f0f0fa" : "#606078", transition: "color 0.2s" }}>{t.label}</span>
                           </motion.button>
                         ))}
                       </motion.div>
@@ -662,7 +672,7 @@ export default function AdminPanel({ onExit }: Props) {
       <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "auto", minWidth: 0, height: "100%" }}>
 
         {/* ── TOP HEADER ── */}
-        <header style={{ padding: isMobile ? "14px 16px" : "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(8,8,16,0.92)", backdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 50 }}>
+        <header style={{ padding: isMobile ? "14px 16px" : "16px 24px", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(8,8,16,0.97)", backdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 100 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <motion.button whileTap={{ scale: 0.88 }} onClick={() => setSidebarOpen(!sidebarOpen)}
               style={{ width: 42, height: 42, borderRadius: 13, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "#f0f0fa", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
@@ -671,13 +681,13 @@ export default function AdminPanel({ onExit }: Props) {
             <div style={{ flex: 1, minWidth: 0 }}>
               <h1 style={{ fontSize: isMobile ? 17 : 18, fontWeight: 700, color: "#f0f0fa", letterSpacing: "-0.2px" }}>{currentTabLabel}</h1>
               {!isMobile && PLAN_TABS.some(t => t.id === tab) && (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6, flexWrap: "wrap", position: "relative", zIndex: 110 }}>
                   <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)}
-                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "6px 12px", fontSize: 13, color: "#f0f0fa", outline: "none", cursor: "pointer" }}>
+                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "10px 32px 10px 14px", fontSize: 14, color: "#f0f0fa", outline: "none", cursor: "pointer", minWidth: 140, position: "relative", zIndex: 111 }}>
                     {allCities.map(c => <option key={c.id} value={c.id} style={{ background: "#0a0a14" }}>{c.label}</option>)}
                   </select>
                   <select value={selectedCompanyId} onChange={e => setSelectedCompanyId(e.target.value)}
-                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "6px 12px", fontSize: 13, color: "#f0f0fa", outline: "none", cursor: "pointer" }}>
+                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "10px 32px 10px 14px", fontSize: 14, color: "#f0f0fa", outline: "none", cursor: "pointer", minWidth: 140, position: "relative", zIndex: 111 }}>
                     {companies.filter(c => c.cityId === selectedCity).map(c => <option key={c.id} value={c.id} style={{ background: "#0a0a14" }}>{c.name}</option>)}
                   </select>
                 </div>
@@ -697,7 +707,7 @@ export default function AdminPanel({ onExit }: Props) {
 
         {/* ── Mobile city/company selector (shown below header on mobile for plan tabs) ── */}
         {isMobile && PLAN_TABS.some(t => t.id === tab) && (
-          <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", gap: 8, background: "rgba(8,8,16,0.8)" }}>
+          <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", gap: 8, background: "rgba(8,8,16,0.97)", position: "sticky", top: 0, zIndex: 90 }}>
             <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)}
               style={{ flex: 1, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "10px 14px", fontSize: 14, color: "#f0f0fa", outline: "none", cursor: "pointer" }}>
               {allCities.map(c => <option key={c.id} value={c.id} style={{ background: "#0a0a14" }}>{c.label}</option>)}
@@ -854,8 +864,8 @@ export default function AdminPanel({ onExit }: Props) {
                         <input type="text" placeholder="Поиск..." value={search} onChange={e => setSearch(e.target.value)} style={{ ...inp, paddingLeft: 36, fontSize: 13 }} />
                       </div>
                       <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={openCreate}
-                        style={{ background: "linear-gradient(135deg, #e63946, #c1121f)", border: "none", borderRadius: 12, padding: "11px 18px", fontSize: 13, fontWeight: 600, color: "white", cursor: "pointer", boxShadow: "0 4px 14px rgba(230,57,70,0.3)", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                        <span style={{ fontSize: 16 }}>+</span> Добавить
+                        style={{ background: "linear-gradient(135deg, #e63946, #c1121f)", border: "none", borderRadius: 14, padding: "13px 30px", fontSize: 15, fontWeight: 600, color: "white", cursor: "pointer", boxShadow: "0 4px 14px rgba(230,57,70,0.3)", display: "flex", alignItems: "center", gap: 8, flexShrink: 0, whiteSpace: "nowrap" as const }}>
+                        <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Добавить
                       </motion.button>
                     </div>
 
@@ -1089,7 +1099,7 @@ export default function AdminPanel({ onExit }: Props) {
                           </motion.button>
                           <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
                             onClick={() => { setFormError(""); setShowForm(true); setSelectedUser(null); }}
-                            style={{ background: "linear-gradient(135deg, #4f8ef7 0%, #6c5ce7 100%)", border: "none", borderRadius: 11, padding: "10px 18px", fontSize: 13, color: "#fff", cursor: "pointer", fontWeight: 700, display: "flex", alignItems: "center", gap: 7 }}>
+                            style={{ background: "linear-gradient(135deg, #4f8ef7 0%, #6c5ce7 100%)", border: "none", borderRadius: 14, padding: "13px 30px", fontSize: 15, color: "#fff", cursor: "pointer", fontWeight: 700, display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" as const }}>
                             <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Добавить сотрудника
                           </motion.button>
                       </div>
@@ -1286,9 +1296,9 @@ export default function AdminPanel({ onExit }: Props) {
                             <div style={{ display: "flex", gap: 10 }}>
                               <input type="text" value={newCoName} onChange={e => { setNewCoName(e.target.value); setCoError(""); }}
                                 onKeyDown={e => e.key === "Enter" && handleAddCompany()}
-                                placeholder="Название компании или объекта..." style={{ ...inp, flex: 1, fontSize: 13 }} />
+                                placeholder="Название компании или объекта..." style={{ ...inp, flex: 1 }} />
                               <motion.button onClick={handleAddCompany} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                                style={{ background: "linear-gradient(135deg, #4f8ef7, #2563eb)", border: "none", borderRadius: 11, padding: "11px 18px", fontSize: 13, fontWeight: 600, color: "white", cursor: "pointer", flexShrink: 0, boxShadow: "0 4px 12px rgba(79,142,247,0.25)", whiteSpace: "nowrap" }}>
+                                style={{ background: "linear-gradient(135deg, #4f8ef7, #2563eb)", border: "none", borderRadius: 14, padding: "13px 30px", fontSize: 15, fontWeight: 600, color: "white", cursor: "pointer", flexShrink: 0, boxShadow: "0 4px 12px rgba(79,142,247,0.25)", whiteSpace: "nowrap" }}>
                                 + Добавить
                               </motion.button>
                             </div>
@@ -1495,7 +1505,7 @@ export default function AdminPanel({ onExit }: Props) {
                       <p style={{ fontSize: 12, color: "#6b6b80", marginTop: 2 }}>Только администратор может добавлять и просматривать камеры</p>
                     </div>
                     <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={() => setShowCamForm(v => !v)}
-                      style={{ background: "linear-gradient(135deg, #8e44ad, #6c3483)", border: "none", borderRadius: 12, padding: "10px 18px", fontSize: 13, fontWeight: 600, color: "white", cursor: "pointer", boxShadow: "0 4px 14px rgba(142,68,173,0.3)" }}>
+                      style={{ background: "linear-gradient(135deg, #8e44ad, #6c3483)", border: "none", borderRadius: 14, padding: "13px 30px", fontSize: 15, fontWeight: 600, color: "white", cursor: "pointer", boxShadow: "0 4px 14px rgba(142,68,173,0.3)", whiteSpace: "nowrap" }}>
                       + Добавить камеру
                     </motion.button>
                   </div>

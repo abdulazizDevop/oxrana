@@ -270,8 +270,8 @@ export default function ExpensesSection({ city, companyId, currentUser }: Props)
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                 onClick={() => { resetExpForm(); setShowExpForm(true); }}
-                style={{ background: "linear-gradient(135deg, #f39c12, #e67e22)", border: "none", borderRadius: 12, padding: "10px 20px", fontSize: 13, fontWeight: 600, color: "white", cursor: "pointer", boxShadow: "0 4px 14px rgba(243,156,18,0.35)", display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 16 }}>+</span> Добавить расход
+                style={{ background: "linear-gradient(135deg, #f39c12, #e67e22)", border: "none", borderRadius: 14, padding: "13px 30px", fontSize: 14, fontWeight: 600, color: "white", cursor: "pointer", boxShadow: "0 4px 14px rgba(243,156,18,0.35)", display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" }}>
+                <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Добавить расход
               </motion.button>
             </div>
 
@@ -356,7 +356,7 @@ export default function ExpensesSection({ city, companyId, currentUser }: Props)
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
               <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }}
                 onClick={() => { setShowFuelForm(v => !v); setFuelSaveError(null); }}
-                style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 14, background: showFuelForm ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.06)", border: `1px solid ${showFuelForm ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)"}`, color: showFuelForm ? "#fbbf24" : "#f0f0fa", fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
+                style={{ display: "flex", alignItems: "center", gap: 6, padding: "13px 28px", borderRadius: 14, background: showFuelForm ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.06)", border: `1px solid ${showFuelForm ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.1)"}`, color: showFuelForm ? "#fbbf24" : "#f0f0fa", fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
                 <Plus size={15} /> Добавить запись
               </motion.button>
             </div>
@@ -704,7 +704,7 @@ export default function ExpensesSection({ city, companyId, currentUser }: Props)
       <AnimatePresence>
         {fuelSaveSuccess && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20 }}
-            style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 60, background: "#22c55e", color: "white", fontSize: 13, fontWeight: 600, padding: "12px 22px", borderRadius: 16, boxShadow: "0 8px 32px rgba(34,197,94,0.4)", display: "flex", alignItems: "center", gap: 8 }}>
+            style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 60, background: "#22c55e", color: "white", fontSize: 13, fontWeight: 600, padding: "13px 30px", borderRadius: 16, boxShadow: "0 8px 32px rgba(34,197,94,0.4)", display: "flex", alignItems: "center", gap: 8 }}>
             ✅ Запись сохранена
           </motion.div>
         )}

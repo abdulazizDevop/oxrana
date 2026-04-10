@@ -129,12 +129,12 @@ export default function TransportSection({ city, companyId, currentUser }: { cit
           <div style={{ display: "flex", gap: 8 }}>
             <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }}
               onClick={() => { setShowLog(true); fetchLog(); }}
-              style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "#606078", fontSize: 13, cursor: "pointer", fontWeight: 500 }}>
+              style={{ display: "flex", alignItems: "center", gap: 8, padding: "13px 28px", borderRadius: 16, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "#606078", fontSize: 15, cursor: "pointer", fontWeight: 500 }}>
               📋 Журнал
             </motion.button>
             <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }}
               onClick={() => setShowAddForm(v => !v)}
-              style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 18px", borderRadius: 14, background: showAddForm ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#f0f0fa", fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
+              style={{ display: "flex", alignItems: "center", gap: 8, padding: "13px 28px", borderRadius: 16, background: showAddForm ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#f0f0fa", fontSize: 15, cursor: "pointer", fontWeight: 600 }}>
               + Добавить
             </motion.button>
           </div>

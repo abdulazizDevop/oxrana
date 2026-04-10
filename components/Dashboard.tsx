@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PatrolSection from "./sections/PatrolSection";
 import ShiftSection from "./sections/ShiftSection";
@@ -97,14 +97,14 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
 
   useEffect(() => {
     // Suggest changing credentials after 3 days
-    if (currentUser.createdAt && !currentUser.is_admin) {
-      const ageInDays = (Date.now() - currentUser.createdAt) / (1000 * 60 * 60 * 24);
+    if (currentUser.created_at && !currentUser.is_admin) {
+      const ageInDays = (Date.now() - new Date(currentUser.created_at).getTime()) / (1000 * 60 * 60 * 24);
       const hasDismissed = localStorage.getItem(`dismissed_creds_prompt_${currentUser.id}`);
       if (ageInDays >= 3 && !hasDismissed) {
         setShowCredentialsPrompt(true);
       }
     }
-  }, [currentUser.createdAt, currentUser.id, currentUser.is_admin]);
+  }, [currentUser.created_at, currentUser.id, currentUser.is_admin]);
 
   useEffect(() => {
     fetch("/api/admin/settings").then(r => r.json()).then(s => {
@@ -253,7 +253,7 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
           onCityChange={onCityChange} menu={allowedMenu} currentUser={currentUser} onLogout={onLogout}
           emergencyAlert={emergencyAlert} onEmergency={() => setEmConfirm(true)} onResolve={resolveEmergency}
           emConfirm={emConfirm} setEmConfirm={setEmConfirm} emSending={emSending} triggerEmergency={triggerEmergency}
-          onRequest={(type = "connect") => { setRequestType(type); setShowRequestModal(true); }}
+          onRequest={(type: "connect" | "new_object" | "subscription" = "connect") => { setRequestType(type); setShowRequestModal(true); }}
         />
       </>
     );
