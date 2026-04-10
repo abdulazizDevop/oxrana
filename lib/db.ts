@@ -156,6 +156,7 @@ export async function initDb() {
         employee_count INTEGER DEFAULT 0,
         owner_id TEXT,
         subscription_ends_at TIMESTAMPTZ,
+        used_storage_bytes BIGINT DEFAULT 0,
         created_at TIMESTAMPTZ DEFAULT now()
       );
       CREATE TABLE IF NOT EXISTS app_users (
@@ -373,6 +374,7 @@ export async function initDb() {
       -- Add missing columns to existing tables if needed
       ALTER TABLE companies ADD COLUMN IF NOT EXISTS owner_id TEXT;
       ALTER TABLE companies ADD COLUMN IF NOT EXISTS subscription_ends_at TIMESTAMPTZ;
+      ALTER TABLE companies ADD COLUMN IF NOT EXISTS used_storage_bytes BIGINT DEFAULT 0;
       
       ALTER TABLE connection_applications ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'connect';
       ALTER TABLE connection_applications ADD COLUMN IF NOT EXISTS user_id TEXT;

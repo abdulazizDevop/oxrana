@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const recordId = formData.get('recordId') as string;
+    const companyId = formData.get('companyId') as string;
 
     if (!file) return NextResponse.json({ error: 'Файл не найден' }, { status: 400 });
     if (!ALLOWED_TYPES.has(file.type)) return NextResponse.json({ error: 'Недопустимый тип файла' }, { status: 400 });
@@ -39,6 +40,11 @@ export async function POST(req: NextRequest) {
         `INSERT INTO record_files (id, record_id, file_name, file_path, file_type, file_size) VALUES ($1,$2,$3,$4,$5,$6)`,
         [fileId, recordId, file.name, publicUrl, file.type, file.size]
       );
+    }
+
+    // Update company storage usage
+    if (companyId) {
+      await query('UPDATE companies SET used_storage_bytes = used_storage_bytes + $1 WHERE id = $2', [file.size, companyId]);
     }
 
     return NextResponse.json({

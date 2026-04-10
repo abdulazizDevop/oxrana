@@ -12,14 +12,14 @@ export async function GET(req: NextRequest) {
     const id = searchParams.get('id');
 
     if (id) {
-      const res = await query('SELECT id, city_id as "cityId", name, description, professions_list, employee_count, created_at as "createdAt", subscription_ends_at as "subscriptionEndsAt", owner_id as "ownerId" FROM companies WHERE id = $1', [id]);
+      const res = await query('SELECT id, city_id as "cityId", name, description, professions_list, employee_count, created_at as "createdAt", subscription_ends_at as "subscriptionEndsAt", owner_id as "ownerId", used_storage_bytes as "usedStorageBytes" FROM companies WHERE id = $1', [id]);
       return NextResponse.json(res.rows[0]);
     }
     if (cityId) {
-      const res = await query('SELECT id, city_id as "cityId", name, description, professions_list, employee_count, created_at as "createdAt", subscription_ends_at as "subscriptionEndsAt", owner_id as "ownerId" FROM companies WHERE city_id = $1 ORDER BY name ASC', [cityId]);
+      const res = await query('SELECT id, city_id as "cityId", name, description, professions_list, employee_count, created_at as "createdAt", subscription_ends_at as "subscriptionEndsAt", owner_id as "ownerId", used_storage_bytes as "usedStorageBytes" FROM companies WHERE city_id = $1 ORDER BY name ASC', [cityId]);
       return NextResponse.json(res.rows);
     }
-    const res = await query('SELECT id, city_id as "cityId", name, description, professions_list, employee_count, created_at as "createdAt", subscription_ends_at as "subscriptionEndsAt", owner_id as "ownerId" FROM companies ORDER BY name ASC');
+    const res = await query('SELECT id, city_id as "cityId", name, description, professions_list, employee_count, created_at as "createdAt", subscription_ends_at as "subscriptionEndsAt", owner_id as "ownerId", used_storage_bytes as "usedStorageBytes" FROM companies ORDER BY name ASC');
     return NextResponse.json(res.rows);
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

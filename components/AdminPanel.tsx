@@ -272,6 +272,7 @@ export default function AdminPanel({ onExit }: Props) {
   const [subPhoneEdit, setSubPhoneEdit] = useState("");
   const [subCardEdit, setSubCardEdit] = useState("");
   const [subPriceEdit, setSubPriceEdit] = useState("9 990 ₽");
+  const [storagePriceEdit, setStoragePriceEdit] = useState("0.07");
   const [subLoading, setSubLoading] = useState(false);
   const [allCompanies, setAllCompanies] = useState<Company[]>([]);
   const [extendingCompany, setExtendingCompany] = useState<string | null>(null);
@@ -285,6 +286,7 @@ export default function AdminPanel({ onExit }: Props) {
         setSubPhoneEdit(data.subscription_phone || "");
         setSubCardEdit(data.subscription_card || "");
         setSubPriceEdit(data.subscription_price || "9 990 ₽");
+        setStoragePriceEdit(data.storage_price_per_gb || "0.07");
       }).catch(() => {});
       
       fetch("/api/companies").then(r => r.json()).then(data => {
@@ -300,8 +302,9 @@ export default function AdminPanel({ onExit }: Props) {
       fetch("/api/admin/settings", { method: "POST", headers: h, body: JSON.stringify({ id: "subscription_phone", value: subPhoneEdit }) }),
       fetch("/api/admin/settings", { method: "POST", headers: h, body: JSON.stringify({ id: "subscription_card", value: subCardEdit }) }),
       fetch("/api/admin/settings", { method: "POST", headers: h, body: JSON.stringify({ id: "subscription_price", value: subPriceEdit }) }),
+      fetch("/api/admin/settings", { method: "POST", headers: h, body: JSON.stringify({ id: "storage_price_per_gb", value: storagePriceEdit }) }),
     ]);
-    setAdminSettings(prev => ({ ...prev, subscription_phone: subPhoneEdit, subscription_card: subCardEdit, subscription_price: subPriceEdit }));
+    setAdminSettings(prev => ({ ...prev, subscription_phone: subPhoneEdit, subscription_card: subCardEdit, subscription_price: subPriceEdit, storage_price_per_gb: storagePriceEdit }));
   };
 
   const handleExtendSubscription = async (companyId: string, months: number) => {
@@ -808,6 +811,10 @@ export default function AdminPanel({ onExit }: Props) {
                               <label style={{ fontSize: 10, color: "#55556a", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>Стоимость за 1 объект</label>
                               <input type="text" value={subPriceEdit} onChange={e => setSubPriceEdit(e.target.value)} style={inp} placeholder="9 990 ₽" />
                             </div>
+                            <div>
+                              <label style={{ fontSize: 10, color: "#55556a", display: "block", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>Тариф хранилища (₽ за 1 ГБ)</label>
+                              <input type="text" value={storagePriceEdit} onChange={e => setStoragePriceEdit(e.target.value)} style={inp} placeholder="0.07" />
+                            </div>
                           </div>
                           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={handleSavePaymentSettings}
                             style={{ background: "linear-gradient(135deg, #4f8ef7, #2563eb)", border: "none", borderRadius: 14, padding: "13px 28px", color: "white", fontSize: 15, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 14px rgba(79,142,247,0.3)" }}>
@@ -847,6 +854,23 @@ export default function AdminPanel({ onExit }: Props) {
                                         </span>
                                         <span style={{ fontSize: 12, color: "#44445a" }}>· до {endDate}</span>
                                       </div>
+                                    </div>
+
+                                    <div style={{ minWidth: 140 }}>
+                                      <div style={{ fontSize: 10, color: "#55556a", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>Хранилище</div>
+                                      {(() => {
+                                        const bytes = Number((co as any).usedStorageBytes) || 0;
+                                        const gb = bytes / (1024 * 1024 * 1024);
+                                        const pricePerGb = parseFloat(adminSettings.storage_price_per_gb || storagePriceEdit || "0.07");
+                                        const cost = gb * pricePerGb;
+                                        const sizeStr = bytes < 1024 ? bytes + ' B' : bytes < 1024*1024 ? (bytes/1024).toFixed(1) + ' KB' : bytes < 1024*1024*1024 ? (bytes/(1024*1024)).toFixed(1) + ' MB' : gb.toFixed(2) + ' GB';
+                                        return (
+                                          <div>
+                                            <span style={{ fontSize: 14, fontWeight: 700, color: "#e0e0f0" }}>{sizeStr}</span>
+                                            {bytes > 0 && <div style={{ fontSize: 11, color: "#fbbf24", marginTop: 2 }}>{cost.toFixed(2)} ₽</div>}
+                                          </div>
+                                        );
+                                      })()}
                                     </div>
 
                                     <div style={{ display: "flex", gap: 8 }}>

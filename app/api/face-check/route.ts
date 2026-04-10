@@ -32,6 +32,11 @@ export async function POST(req: NextRequest) {
       [fileId, userId || null, userName, userLogin, photoUrl, checkType, city, companyId, ipAddress]
     );
 
+    // Update company storage usage
+    if (companyId) {
+      await query('UPDATE companies SET used_storage_bytes = used_storage_bytes + $1 WHERE id = $2', [buffer.length, companyId]);
+    }
+
     return NextResponse.json({ success: true, photoUrl, logId: fileId });
   } catch (err) {
     console.error('Face check error:', err);
