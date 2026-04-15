@@ -61,7 +61,7 @@ export async function PATCH(req: NextRequest) {
       name: 'auth_token',
       value: newToken,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.COOKIE_SECURE === 'true',
       sameSite: 'strict',
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
