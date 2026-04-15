@@ -182,6 +182,22 @@ export default function Home() {
     }
   }, [selectedCompanyForDetails]);
 
+  // Restore session on page load from auth cookie
+  useEffect(() => {
+    fetch("/api/auth").then(r => r.ok ? r.json() : null).then(data => {
+      if (!data?.authenticated) return;
+      const u = data.user;
+      if (u.is_admin) { setIsAdmin(true); return; }
+      setCurrentUser({
+        id: u.id, name: u.name, role: u.role, profession: u.profession,
+        login: u.login, password: "", is_admin: !!u.is_admin,
+        allowedSections: u.allowed_sections || [],
+        allowedCities: u.allowed_cities || [],
+        allowedCompanies: u.allowed_companies || [],
+      });
+    }).catch(() => {});
+  }, []);
+
   useEffect(() => {
     if (!currentUser && !isAdmin) return;
     fetch("/api/cities").then(r => r.json()).then((rows: { id: string; name: string; is_default: boolean }[]) => {
