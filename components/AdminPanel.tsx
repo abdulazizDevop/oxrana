@@ -1145,21 +1145,21 @@ export default function AdminPanel({ onExit }: Props) {
                         <h2 style={{ fontSize: 18, fontWeight: 700, color: "#e8e8f0", margin: 0 }}>Логины и пароли</h2>
                         <p style={{ fontSize: 12, color: "#55556a", marginTop: 4 }}>Все учётные записи сотрудников</p>
                       </div>
-                      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                        <div style={{ position: "relative" }}>
+                      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", width: "100%" }}>
+                        <div style={{ position: "relative", flex: "1 1 220px", minWidth: 180 }}>
                           <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "#55556a" }}>🔍</span>
                           <input type="text" placeholder="Поиск сотрудника..." value={loginsTabSearch} onChange={e => setLoginsTabSearch(e.target.value)}
-                            style={{ ...inp, paddingLeft: 36, fontSize: 13, width: 220 }} />
+                            style={{ ...inp, paddingLeft: 36, fontSize: 13, width: "100%" }} />
                         </div>
-                          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={loadAllCreds}
-                            style={{ background: "rgba(79,142,247,0.1)", border: "1px solid rgba(79,142,247,0.22)", borderRadius: 11, padding: "10px 16px", fontSize: 12, color: "#4f8ef7", cursor: "pointer", fontWeight: 600 }}>
-                            ↻ Обновить
-                          </motion.button>
-                          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                            onClick={() => { setFormError(""); setShowForm(true); setSelectedUser(null); }}
-                            style={{ background: "linear-gradient(135deg, #4f8ef7 0%, #6c5ce7 100%)", border: "none", borderRadius: 14, padding: "13px 30px", fontSize: 15, color: "#fff", cursor: "pointer", fontWeight: 700, display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" as const }}>
-                            <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Добавить сотрудника
-                          </motion.button>
+                        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} onClick={loadAllCreds}
+                          style={{ background: "rgba(79,142,247,0.1)", border: "1px solid rgba(79,142,247,0.22)", borderRadius: 11, padding: "10px 16px", fontSize: 12, color: "#4f8ef7", cursor: "pointer", fontWeight: 600, flexShrink: 0 }}>
+                          ↻ Обновить
+                        </motion.button>
+                        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                          onClick={() => { setFormError(""); setShowForm(true); setSelectedUser(null); }}
+                          style={{ background: "linear-gradient(135deg, #4f8ef7 0%, #6c5ce7 100%)", border: "none", borderRadius: 14, padding: "13px 24px", fontSize: 14, color: "#fff", cursor: "pointer", fontWeight: 700, display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" as const, flexShrink: 0 }}>
+                          <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Добавить сотрудника
+                        </motion.button>
                       </div>
                     </div>
 
