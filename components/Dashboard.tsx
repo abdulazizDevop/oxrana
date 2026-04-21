@@ -118,21 +118,21 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
 
   const sectionMap = getSectionMap(city, company?.id, currentUser);
 
-  // Periodic face check every 3 hours
+  // Periodic face check every 3 hours (only for guards/patrol, not office roles)
   const [showPeriodicFaceCheck, setShowPeriodicFaceCheck] = useState(false);
+  const skipFaceCheck = currentUser.is_admin || ["company_manager", "office", "director", "manager", "admin"].includes(currentUser.role);
   useEffect(() => {
-    // Check immediately on mount if 3h have passed
+    if (skipFaceCheck) return;
     if (shouldRequireFaceCheck(currentUser.login)) {
       setShowPeriodicFaceCheck(true);
     }
-    // Re-check every minute
     const interval = setInterval(() => {
       if (shouldRequireFaceCheck(currentUser.login)) {
         setShowPeriodicFaceCheck(true);
       }
     }, 60_000);
     return () => clearInterval(interval);
-  }, [currentUser.login]);
+  }, [currentUser.login, skipFaceCheck]);
 
   const [emergencyAlert, setEmergencyAlert] = useState<EmergencyAlert | null>(null);
   const [emConfirm, setEmConfirm] = useState(false);

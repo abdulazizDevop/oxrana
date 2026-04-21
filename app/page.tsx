@@ -238,7 +238,9 @@ export default function Home() {
       setUserError("");
       
       if (user.is_admin) { setIsAdmin(true); return; }
-      if (user.role === "company_manager") {
+      // Office roles (manager, office, director, etc.) — skip face check
+      const noFaceCheckRoles = ["company_manager", "office", "director", "manager", "admin"];
+      if (noFaceCheckRoles.includes(user.role)) {
         setCurrentUser(user); setShowInstructions(true);
       } else {
         setPendingUser(user);

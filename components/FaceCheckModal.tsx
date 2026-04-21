@@ -63,20 +63,63 @@ export function FaceCheckModal({
       }
       setCameraReady(false);
       setCameraError("");
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: mode, width: { ideal: 640 }, height: { ideal: 480 } },
-        audio: false,
-      });
+
+      // Check HTTPS requirement (required by modern browsers, except localhost)
+      if (typeof window !== "undefined") {
+        const isSecure = window.isSecureContext || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        if (!isSecure) {
+          setCameraError("Для доступа к камере требуется HTTPS. Обратитесь к администратору для настройки SSL.");
+          return;
+        }
+      }
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setCameraError("Ваш браузер не поддерживает доступ к камере. Используйте Chrome, Safari или Firefox.");
+        return;
+      }
+
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: mode }, width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: false,
+        });
+      } catch (e) {
+        // Fallback: any camera
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
+
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play();
+      const video = videoRef.current;
+      if (!video) return;
+
+      video.srcObject = stream;
+      video.setAttribute("playsinline", "true");
+      video.setAttribute("webkit-playsinline", "true");
+      video.muted = true;
+
+      const onReady = () => {
+        video.play().then(() => setCameraReady(true)).catch(() => {
+          // Autoplay blocked — user gesture needed
           setCameraReady(true);
-        };
+        });
+      };
+
+      if (video.readyState >= 2) {
+        onReady();
+      } else {
+        video.oncanplay = onReady;
+        video.onloadedmetadata = onReady;
       }
     } catch (err: any) {
-      setCameraError("Нет доступа к камере. Разрешите доступ в настройках браузера.");
+      const msg = err?.name === "NotAllowedError"
+        ? "Доступ к камере запрещён. Разрешите в настройках браузера."
+        : err?.name === "NotFoundError"
+        ? "Камера не найдена на устройстве."
+        : err?.name === "NotReadableError"
+        ? "Камера занята другим приложением."
+        : "Не удалось открыть камеру. Попробуйте перезагрузить страницу.";
+      setCameraError(msg);
     }
   }, []);
 
