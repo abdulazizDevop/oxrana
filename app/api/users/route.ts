@@ -9,16 +9,29 @@ async function getUserPayload(req: NextRequest): Promise<any> {
   return await verifyToken(token);
 }
 
-function hasPermissionForEntities(payload: any, requestedCities: string[], requestedCompanies: string[]) {
+async function hasPermissionForEntities(payload: any, requestedCities: string[], requestedCompanies: string[]) {
   if (payload.is_admin) return true;
-  
+
   const userCities = payload.allowed_cities || [];
   const userCompanies = payload.allowed_companies || [];
-  
-  const hasCities = requestedCities.every(c => userCities.includes(c));
-  const hasCompanies = requestedCompanies.every(c => userCompanies.includes(c));
-  
-  return hasCities && hasCompanies;
+
+  const citiesOk = requestedCities.every((c: string) => userCities.includes(c));
+  const companiesOk = requestedCompanies.every((c: string) => userCompanies.includes(c));
+  if (citiesOk && companiesOk) return true;
+
+  // Fallback: if the user is the owner of every requested company (and the cities of those
+  // companies cover every requested city), grant access. This unblocks newly-registered users
+  // who created their own company but whose JWT hasn't been refreshed yet.
+  if (requestedCompanies.length === 0) return false;
+  const ownerCheck = await query(
+    'SELECT id, city_id FROM companies WHERE id = ANY($1::text[]) AND owner_id = $2',
+    [requestedCompanies, payload.id]
+  );
+  const ownsAllCompanies = ownerCheck.rows.length === requestedCompanies.length;
+  if (!ownsAllCompanies) return false;
+  const ownedCityIds: string[] = ownerCheck.rows.map((r: any) => r.city_id);
+  const ownsAllCities = requestedCities.every((c: string) => ownedCityIds.includes(c));
+  return ownsAllCities;
 }
 
 export async function GET(req: NextRequest) {
@@ -86,14 +99,19 @@ export async function POST(req: NextRequest) {
   if (!allowedCities || allowedCities.length === 0) return NextResponse.json({ error: 'Выберите город' }, { status: 400 });
   if (!allowedCompanies || allowedCompanies.length === 0) return NextResponse.json({ error: 'Выберите компанию' }, { status: 400 });
 
-  if (!hasPermissionForEntities(payload, allowedCities, allowedCompanies)) {
+  if (!(await hasPermissionForEntities(payload, allowedCities, allowedCompanies))) {
     return NextResponse.json({ error: 'Forbidden: Cannot assign cities/companies you do not have access to' }, { status: 403 });
   }
 
-  // Check 10 employees limit per company
+  // Check 10 employees limit per company (exclude the company owner from the count)
   if (!payload.is_admin) {
     for (const coId of allowedCompanies) {
-      const countRes = await query('SELECT COUNT(*) as count FROM app_users WHERE $1 = ANY(allowed_companies)', [coId]);
+      const countRes = await query(
+        `SELECT COUNT(*) as count FROM app_users u
+         WHERE $1 = ANY(u.allowed_companies)
+           AND u.id <> COALESCE((SELECT owner_id FROM companies WHERE id = $1), '')`,
+        [coId]
+      );
       if (parseInt(countRes.rows[0].count) >= 10) {
         return NextResponse.json({ error: `Превышен лимит сотрудников (макс. 10) для компании с ID: ${coId}` }, { status: 400 });
       }
@@ -121,7 +139,7 @@ export async function PUT(req: NextRequest) {
   if (!allowedCities || allowedCities.length === 0) return NextResponse.json({ error: 'Выберите город' }, { status: 400 });
   if (!allowedCompanies || allowedCompanies.length === 0) return NextResponse.json({ error: 'Выберите компанию' }, { status: 400 });
 
-  if (!hasPermissionForEntities(payload, allowedCities, allowedCompanies)) {
+  if (!(await hasPermissionForEntities(payload, allowedCities, allowedCompanies))) {
     return NextResponse.json({ error: 'Forbidden: Cannot assign cities/companies you do not have access to' }, { status: 403 });
   }
 
@@ -129,7 +147,7 @@ export async function PUT(req: NextRequest) {
     const target = await query('SELECT allowed_cities, allowed_companies, is_admin FROM app_users WHERE id = $1', [id]);
     if (target.rows.length === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     if (target.rows[0].is_admin) return NextResponse.json({ error: 'Forbidden: Cannot edit admin' }, { status: 403 });
-    if (!hasPermissionForEntities(payload, target.rows[0].allowed_cities || [], target.rows[0].allowed_companies || [])) {
+    if (!(await hasPermissionForEntities(payload, target.rows[0].allowed_cities || [], target.rows[0].allowed_companies || []))) {
       return NextResponse.json({ error: 'Forbidden: Cannot edit user outside your access scope' }, { status: 403 });
     }
   }
@@ -163,7 +181,7 @@ export async function DELETE(req: NextRequest) {
     const target = await query('SELECT allowed_cities, allowed_companies, is_admin FROM app_users WHERE id = $1', [id]);
     if (target.rows.length === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });
     if (target.rows[0].is_admin) return NextResponse.json({ error: 'Forbidden: Cannot delete admin' }, { status: 403 });
-    if (!hasPermissionForEntities(payload, target.rows[0].allowed_cities || [], target.rows[0].allowed_companies || [])) {
+    if (!(await hasPermissionForEntities(payload, target.rows[0].allowed_cities || [], target.rows[0].allowed_companies || []))) {
       return NextResponse.json({ error: 'Forbidden: Cannot delete user outside your access scope' }, { status: 403 });
     }
   }

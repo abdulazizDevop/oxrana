@@ -210,9 +210,23 @@ export default function Home() {
     }).catch(() => {});
   }, [currentUser, isAdmin]);
 
-  const handleAdminLogin = () => {
-    if (adminCode === "5051") { setIsAdmin(true); setAdminError(false); }
-    else { setAdminError(true); setAdminShake(true); setTimeout(() => setAdminShake(false), 500); }
+  const handleAdminLogin = async () => {
+    try {
+      const res = await fetch("/api/auth/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: adminCode }),
+      });
+      if (!res.ok) {
+        setAdminError(true); setAdminShake(true);
+        setTimeout(() => setAdminShake(false), 500);
+        return;
+      }
+      setIsAdmin(true); setAdminError(false);
+    } catch {
+      setAdminError(true); setAdminShake(true);
+      setTimeout(() => setAdminShake(false), 500);
+    }
   };
 
   const handleUserLogin = async () => {
@@ -332,8 +346,25 @@ export default function Home() {
     if (!city) return;
     const id = name.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now();
     const res = await fetch("/api/companies", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, cityId: city.id, name, description: "", professions_list: "", employee_count: 0 }) });
-    const newCo: Company = await res.json();
-    setCompanies(prev => [...prev, newCo]); setNewCompanyName(""); setAddCompanyError(""); setShowAddCompanyModal(false);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      setAddCompanyError(err.error || "Ошибка при создании компании");
+      return;
+    }
+    const data = await res.json();
+    const newCo: Company = data;
+    setCompanies(prev => [...prev, newCo]);
+    // The server may have refreshed our permissions (added the new city/company to allowed lists).
+    // Sync the local user state so the UI reflects this immediately.
+    if (data.updatedUser && currentUser) {
+      setCurrentUser({
+        ...currentUser,
+        allowedCities: data.updatedUser.allowed_cities || currentUser.allowedCities,
+        allowedCompanies: data.updatedUser.allowed_companies || currentUser.allowedCompanies,
+        allowedSections: data.updatedUser.allowed_sections || currentUser.allowedSections,
+      });
+    }
+    setNewCompanyName(""); setAddCompanyError(""); setShowAddCompanyModal(false);
   };
 
   const handleDeleteCompany = async (id: string, e: React.MouseEvent) => {
@@ -347,12 +378,13 @@ export default function Home() {
   const filteredCities = availableCities.filter(c => c.label.toLowerCase().includes(search.toLowerCase()));
   const filteredCompanies = companies.filter(c => c.name.toLowerCase().includes(companySearch.toLowerCase()));
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try { await fetch("/api/auth", { method: "DELETE" }); } catch {}
     setCity(null); setCompany(null); setCurrentUser(null);
     setStep("auth"); setMode("login"); setLogin(""); setUserPass(""); setCompanies([]);
   };
 
-  if (isAdmin) return <AdminPanel onExit={() => { setIsAdmin(false); setAdminCode(""); setMode("login"); }} />;
+  if (isAdmin) return <AdminPanel onExit={async () => { try { await fetch("/api/auth", { method: "DELETE" }); } catch {} setIsAdmin(false); setAdminCode(""); setMode("login"); }} />;
   if (company && city && currentUser) return (
     <Dashboard city={city.id} cityLabel={city.label} company={company} currentUser={currentUser}
       onCityChange={() => { setCompany(null); setStep("company"); }} onLogout={handleLogout} />

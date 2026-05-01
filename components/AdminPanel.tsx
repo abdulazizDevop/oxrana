@@ -348,8 +348,15 @@ export default function AdminPanel({ onExit }: Props) {
 
   useEffect(() => {
     refreshUsers(); refreshCompanies();
-    fetch("/api/cities").then(r => r.json()).then((rows: { id: string; name: string }[]) => {
-      setAllCities(rows.map(r => ({ id: r.id, label: r.name })));
+    fetch("/api/cities").then(async r => {
+      if (!r.ok) {
+        if (r.status === 401) onExit();
+        return null;
+      }
+      return r.json();
+    }).then((rows) => {
+      if (!Array.isArray(rows) || rows.length === 0) return; // keep DEFAULT_CITIES so the form is usable
+      setAllCities(rows.map((r: { id: string; name: string }) => ({ id: r.id, label: r.name })));
     }).catch(() => {});
   }, []);
 
@@ -385,7 +392,11 @@ export default function AdminPanel({ onExit }: Props) {
   };
 
   const refreshUsers = () => {
-    fetch("/api/users").then(r => r.json()).then((rows: any[]) => {
+    fetch("/api/users").then(async r => {
+      if (!r.ok) { if (r.status === 401) onExit(); return null; }
+      return r.json();
+    }).then((rows) => {
+      if (!Array.isArray(rows)) return;
       setUsers(rows.map(u => ({
         id: u.id, name: u.name, role: u.role, profession: u.profession,
         login: u.login, password: "",
@@ -398,7 +409,11 @@ export default function AdminPanel({ onExit }: Props) {
   };
 
   const refreshCompanies = () => {
-    fetch("/api/companies").then(r => r.json()).then((rows: any[]) => {
+    fetch("/api/companies").then(async r => {
+      if (!r.ok) { if (r.status === 401) onExit(); return null; }
+      return r.json();
+    }).then((rows) => {
+      if (!Array.isArray(rows)) return;
       setCompanies(rows.map(r => ({ id: r.id, cityId: r.cityId || r.city_id, name: r.name, description: r.description, professions_list: r.professions_list, employee_count: r.employee_count, subscriptionEndsAt: r.subscriptionEndsAt, ownerId: r.ownerId })));
     }).catch(() => {});
   };
@@ -440,21 +455,25 @@ export default function AdminPanel({ onExit }: Props) {
     if (form.allowedCities.length === 0) { setFormError("Выберите хотя бы один город"); return; }
     if (form.allowedCompanies.length === 0) { setFormError("Выберите хотя бы одну компанию"); return; }
     try {
-       if (editUser) {
-         await fetch("/api/users", {
-           method: "PUT", headers: { "Content-Type": "application/json" },
-           body: JSON.stringify({ id: editUser.id, name: form.name, role: form.role, profession: form.profession, login: form.login, password: form.password || undefined, allowedSections: form.allowedSections, allowedCities: form.allowedCities, allowedCompanies: form.allowedCompanies }),
-         });
-         refreshUsers(); setShowForm(false);
-       } else {
-         await fetch("/api/users", {
-           method: "POST", headers: { "Content-Type": "application/json" },
-           body: JSON.stringify({ id: "user_" + Date.now(), name: form.name, role: form.role, profession: form.profession, login: form.login, password: form.password, allowedSections: form.allowedSections, allowedCities: form.allowedCities, allowedCompanies: form.allowedCompanies }),
-         });
-         refreshUsers(); setShowForm(false);
-           setNewUserCard({ name: form.name, login: form.login, password: form.password, role: form.role, cities: form.allowedCities, companies: form.allowedCompanies });
+       const res = editUser
+         ? await fetch("/api/users", {
+             method: "PUT", headers: { "Content-Type": "application/json" },
+             body: JSON.stringify({ id: editUser.id, name: form.name, role: form.role, profession: form.profession, login: form.login, password: form.password || undefined, allowedSections: form.allowedSections, allowedCities: form.allowedCities, allowedCompanies: form.allowedCompanies }),
+           })
+         : await fetch("/api/users", {
+             method: "POST", headers: { "Content-Type": "application/json" },
+             body: JSON.stringify({ id: "user_" + Date.now(), name: form.name, role: form.role, profession: form.profession, login: form.login, password: form.password, allowedSections: form.allowedSections, allowedCities: form.allowedCities, allowedCompanies: form.allowedCompanies }),
+           });
+       if (!res.ok) {
+         const err = await res.json().catch(() => ({}));
+         setFormError(err.error || `Ошибка ${res.status}`);
+         return;
        }
-     } catch { setFormError("Ошибка сохранения"); }
+       refreshUsers(); setShowForm(false);
+       if (!editUser) {
+         setNewUserCard({ name: form.name, login: form.login, password: form.password, role: form.role, cities: form.allowedCities, companies: form.allowedCompanies });
+       }
+     } catch (e: any) { setFormError(e?.message || "Ошибка сохранения"); }
   };
 
   const handleDelete = async (id: string) => {
@@ -2074,12 +2093,16 @@ export default function AdminPanel({ onExit }: Props) {
               </div>
 
               {/* Компании */}
-              {companies.length > 0 && (
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <label style={{ fontSize: 10, color: "#6b6b80", textTransform: "uppercase", letterSpacing: "0.08em" }}>Компании <span style={{ color: "#e63946" }}>*</span></label>
-                    <button onClick={() => setForm(f => ({ ...f, allowedCompanies: [] }))} style={{ fontSize: 11, color: "#e63946", background: "none", border: "none", cursor: "pointer" }}>Сбросить</button>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <label style={{ fontSize: 10, color: "#6b6b80", textTransform: "uppercase", letterSpacing: "0.08em" }}>Компании <span style={{ color: "#e63946" }}>*</span></label>
+                  <button onClick={() => setForm(f => ({ ...f, allowedCompanies: [] }))} style={{ fontSize: 11, color: "#e63946", background: "none", border: "none", cursor: "pointer" }}>Сбросить</button>
+                </div>
+                {companies.length === 0 ? (
+                  <div style={{ fontSize: 11, color: "#6b6b80", padding: "10px 12px", background: "rgba(255,255,255,0.03)", border: "1px dashed rgba(255,255,255,0.08)", borderRadius: 9 }}>
+                    Нет компаний. Сначала создайте компанию во вкладке «Компании», затем сможете назначить её сотруднику.
                   </div>
+                ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                     {allCities.map(city => {
                       const ccos = companies.filter(co => co.cityId === city.id);
@@ -2102,8 +2125,8 @@ export default function AdminPanel({ onExit }: Props) {
                       );
                     })}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
               {formError && (
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ fontSize: 12, color: "#e63946", marginBottom: 12, padding: "8px 12px", background: "rgba(230,57,70,0.08)", borderRadius: 8 }}>⚠️ {formError}</motion.p>

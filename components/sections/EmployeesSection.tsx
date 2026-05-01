@@ -83,20 +83,30 @@ export default function EmployeesSection({ city, companyId, currentUser }: { cit
   async function handleAdd() {
     if (!form.name || !form.login || (!form.password && !editingId)) { setError("Заполните все поля"); return; }
     if (form.allowedSections.length === 0) { setError("Выберите хотя бы один раздел доступа"); return; }
+    if (!city) { setError("Город не выбран — вернитесь и выберите город"); return; }
+    if (!companyId) { setError("Объект не выбран — вернитесь и выберите объект"); return; }
     setError("");
     const method = editingId ? "PUT" : "POST";
-    const res = await fetch("/api/users", {
-      method, headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: editingId || "emp_" + Date.now(),
-        name: form.name, role: form.role, profession: form.profession, login: form.login, password: form.password,
-        allowedSections: form.allowedSections,
-        allowedCities: [city], allowedCompanies: [companyId]
-      })
-    });
-    if (!res.ok) { setError("Ошибка при создании"); return; }
-    setShowForm(false);
-    fetchUsers();
+    try {
+      const res = await fetch("/api/users", {
+        method, headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingId || "emp_" + Date.now(),
+          name: form.name, role: form.role, profession: form.profession, login: form.login, password: form.password,
+          allowedSections: form.allowedSections,
+          allowedCities: [city], allowedCompanies: [companyId]
+        })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Ошибка ${res.status}`);
+        return;
+      }
+      setShowForm(false);
+      fetchUsers();
+    } catch (e: any) {
+      setError(e?.message || "Ошибка соединения");
+    }
   }
 
   async function handleDelete(id: string) {
