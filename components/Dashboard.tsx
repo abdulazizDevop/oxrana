@@ -895,7 +895,7 @@ function MobileLayout({
         </AnimatePresence>
 
         {/* Content */}
-        <div style={{ flex: 1, overflowY: "auto", paddingBottom: 90 }}>
+        <div style={{ flex: 1, overflowY: "auto", paddingBottom: "calc(90px + env(safe-area-inset-bottom, 0px))" }}>
           <AnimatePresence mode="wait">
             {active ? (
               <motion.div key={active}
@@ -913,13 +913,13 @@ function MobileLayout({
           </AnimatePresence>
         </div>
 
-        {/* Bottom Tab Bar */}
+        {/* Bottom Tab Bar — safe-area-inset-bottom keeps buttons above the iOS home indicator gesture zone */}
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0,
           background: "rgba(8,8,16,0.97)", backdropFilter: "blur(24px)",
           borderTop: "1px solid rgba(255,255,255,0.05)",
           display: "flex", justifyContent: "space-around", alignItems: "center",
-          padding: "8px 4px 16px", zIndex: 200,
+          padding: "8px 4px max(16px, env(safe-area-inset-bottom, 16px))", zIndex: 200,
         }}>
           {menu.slice(0, 5).map(item => {
             const isActive = active === item.id;
