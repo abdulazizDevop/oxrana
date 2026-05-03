@@ -103,9 +103,9 @@ export default function FileUpload({
           >
             <div className="flex items-center gap-2.5 bg-white/3 border border-white/6 rounded-xl px-3 py-2.5">
               {f.fileType.startsWith("image/") ? (
-                <img src={f.url} alt={f.fileName} className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+                <img src={f.url} alt={f.fileName} className="w-9 h-9 rounded-lg object-cover shrink-0" />
               ) : (
-                <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
                   {icon(f.fileType)}
                 </div>
               )}

@@ -251,18 +251,18 @@ export function InstructionsEditor() {
         {showAdd && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden">
-            <div className="bg-white/[0.03] border border-white/8 rounded-2xl p-5 space-y-4">
+            <div className="bg-white/3 border border-white/8 rounded-2xl p-5 space-y-4">
               <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">Новая роль</p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[11px] text-white/35 tracking-wide">Ключ (англ.)</label>
                   <input placeholder="например: guard_2" value={newKey} onChange={e => setNewKey(e.target.value)}
-                    className="w-full bg-white/[0.04] border border-white/10 focus:border-white/30 focus:bg-white/[0.06] text-white placeholder-white/20 rounded-2xl px-4 py-3 text-sm outline-none transition-all" />
+                    className="w-full bg-white/4 border border-white/10 focus:border-white/30 focus:bg-white/6 text-white placeholder-white/20 rounded-2xl px-4 py-3 text-sm outline-none transition-all" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[11px] text-white/35 tracking-wide">Название роли</label>
                   <input placeholder="например: Охранник 2" value={newLabel} onChange={e => setNewLabel(e.target.value)}
-                    className="w-full bg-white/[0.04] border border-white/10 focus:border-white/30 focus:bg-white/[0.06] text-white placeholder-white/20 rounded-2xl px-4 py-3 text-sm outline-none transition-all" />
+                    className="w-full bg-white/4 border border-white/10 focus:border-white/30 focus:bg-white/6 text-white placeholder-white/20 rounded-2xl px-4 py-3 text-sm outline-none transition-all" />
                 </div>
               </div>
               <div className="flex gap-3 pt-1">
@@ -271,7 +271,7 @@ export function InstructionsEditor() {
                   Создать
                 </button>
                 <button onClick={() => setShowAdd(false)}
-                  className="px-5 py-3 bg-white/[0.04] border border-white/10 text-white/40 rounded-2xl text-sm hover:text-white/70 hover:bg-white/[0.07] transition-all">
+                  className="px-5 py-3 bg-white/4 border border-white/10 text-white/40 rounded-2xl text-sm hover:text-white/70 hover:bg-white/7 transition-all">
                   Отмена
                 </button>
               </div>
@@ -293,7 +293,7 @@ export function InstructionsEditor() {
                 className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-all ${
                   isActive
                     ? "border-blue-500/25 bg-gradient-to-r from-blue-500/15 to-blue-500/5 shadow-[0_0_20px_rgba(79,142,247,0.08)]"
-                    : "border-white/[0.06] bg-white/[0.025] hover:bg-white/[0.05] hover:border-white/10"
+                    : "border-white/6 bg-white/2.5 hover:bg-white/5 hover:border-white/10"
                 }`}>
                 <span className="text-lg flex-shrink-0">{icon}</span>
                 <span className={`text-[13px] truncate font-medium ${isActive ? "text-white" : "text-white/45"}`}>
@@ -307,25 +307,25 @@ export function InstructionsEditor() {
 
         {/* Right: editor */}
         {selected ? (
-          <div className="flex-1 flex flex-col gap-4 min-w-0 bg-white/[0.025] border border-white/[0.06] rounded-3xl p-5 overflow-hidden">
+          <div className="flex-1 flex flex-col gap-4 min-w-0 bg-white/2.5 border border-white/6 rounded-3xl p-5 overflow-hidden">
 
             {/* Role name field */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-xl flex-shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-white/6 border border-white/10 flex items-center justify-center text-xl flex-shrink-0">
                 {DEFAULT_ICON[selected.role_key] || DEFAULT_ICON.default}
               </div>
               <div className="flex-1 relative">
                 <input
                   value={editLabel}
                   onChange={e => setEditLabel(e.target.value)}
-                  className="w-full bg-white/[0.04] border border-white/10 focus:border-white/25 focus:bg-white/[0.06] text-white rounded-2xl px-4 py-3 text-sm font-semibold outline-none transition-all placeholder-white/20"
+                  className="w-full bg-white/4 border border-white/10 focus:border-white/25 focus:bg-white/6 text-white rounded-2xl px-4 py-3 text-sm font-semibold outline-none transition-all placeholder-white/20"
                   placeholder="Название роли"
                 />
               </div>
             </div>
 
             {/* Divider */}
-            <div className="h-px bg-white/[0.05]" />
+            <div className="h-px bg-white/5" />
 
             {/* Textarea */}
             <div className="flex-1 relative flex flex-col">
@@ -333,7 +333,7 @@ export function InstructionsEditor() {
               <textarea
                 value={editContent}
                 onChange={e => setEditContent(e.target.value)}
-                className="flex-1 bg-white/[0.03] border border-white/[0.07] focus:border-white/20 focus:bg-white/[0.05] text-white/80 rounded-2xl px-5 py-4 text-[13.5px] outline-none resize-none leading-[1.85] transition-all placeholder-white/15"
+                className="flex-1 bg-white/3 border border-white/7 focus:border-white/20 focus:bg-white/5 text-white/80 rounded-2xl px-5 py-4 text-[13.5px] outline-none resize-none leading-[1.85] transition-all placeholder-white/15"
                 placeholder="Введите инструкции для этой роли..."
               />
             </div>
@@ -360,7 +360,7 @@ export function InstructionsEditor() {
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-white/15 gap-3 bg-white/[0.02] border border-white/[0.05] rounded-3xl">
+          <div className="flex-1 flex flex-col items-center justify-center text-white/15 gap-3 bg-white/2 border border-white/5 rounded-3xl">
             <Edit3 size={32} strokeWidth={1.2} />
             <span className="text-sm">Выберите роль слева</span>
           </div>

@@ -165,7 +165,7 @@ export default function ShiftSection({ city, companyId }: { city: string; compan
               <FileUpload recordId={pendingId || undefined} companyId={companyId} files={[]} />
               <div className="flex gap-2 pt-4">
                 <motion.button onClick={save} disabled={saving} whileHover={{ scale: saving ? 1 : 1.02 }} whileTap={{ scale: saving ? 1 : 0.97 }}
-                  className="flex-1 py-4 bg-white text-black rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-50">
+                  className="flex-1 py-4 bg-gradient-to-br from-[#4f8ef7] to-[#2563eb] text-white rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 shadow-lg shadow-[#4f8ef7]/30 hover:from-[#5a96f8] hover:to-[#2d6ee5] transition-all disabled:opacity-50">
                   {saving ? <Loader2 size={14} className="animate-spin" /> : null} Сохранить запись
                 </motion.button>
                 <motion.button onClick={cancelForm} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
@@ -192,7 +192,7 @@ export default function ShiftSection({ city, companyId }: { city: string; compan
               const cfg = STATUS_CONFIG[r.data.status] || STATUS_CONFIG.pending;
               return (
                 <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: i * 0.04 }}
-                  className="group bg-white/[0.035] hover:bg-white/[0.06] border border-white/8 hover:border-white/15 rounded-2xl transition-all"
+                  className="group bg-white/3.5 hover:bg-white/6 border border-white/8 hover:border-white/15 rounded-2xl transition-all"
                   style={{ boxShadow: "0 1px 0 rgba(255,255,255,0.04)" }}>
                 <div className="p-5 sm:p-6">
                   <div className="flex items-start justify-between gap-4">

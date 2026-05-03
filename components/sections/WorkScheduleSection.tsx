@@ -303,7 +303,7 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
                 <div className="flex gap-2 pt-1">
                   <motion.button onClick={save} disabled={saving || !form.employeeName.trim() || !form.workStart || !form.workEnd}
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                    className="flex-1 py-4 bg-white text-black rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-40">
+                    className="flex-1 py-4 bg-gradient-to-br from-[#4f8ef7] to-[#2563eb] text-white rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 shadow-lg shadow-[#4f8ef7]/30 hover:from-[#5a96f8] hover:to-[#2d6ee5] transition-all disabled:opacity-40">
                     {saving ? <Loader2 size={14} className="animate-spin" /> : null}
                     Сохранить
                   </motion.button>

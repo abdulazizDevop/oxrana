@@ -113,25 +113,29 @@ export function RequestModal({ isOpen, onClose, userId, type = "connect", compan
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          name: reqName, 
-          phone: reqPhone, 
-          object_name: reqObject || defaultObjectName || "Продление подписки", 
+        body: JSON.stringify({
+          name: reqName,
+          phone: reqPhone,
+          object_name: reqObject || defaultObjectName || "Продление подписки",
           address: reqAddress,
           userId,
           type,
           companyId
         }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setReqError(data.error || `Ошибка ${res.status} при отправке заявки`);
+        return;
+      }
       setReqSuccess(true);
       setTimeout(() => {
         setReqSuccess(false);
         setReqName(""); setReqPhone(""); setReqObject(""); setReqAddress("");
         onClose();
       }, 3000);
-    } catch {
-      setReqError("Ошибка отправки заявки");
+    } catch (e: any) {
+      setReqError(e?.message || "Ошибка соединения");
     } finally {
       setIsSubmittingReq(false);
     }

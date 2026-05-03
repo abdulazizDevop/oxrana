@@ -750,6 +750,13 @@ export default function AdminPanel({ onExit }: Props) {
                   <div style={{ width: 40, height: 40, borderRadius: 13, background: "linear-gradient(135deg, #e63946, #ff6b35)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, color: "white", fontWeight: 700 }}>А</div>
                 </div>
               )}
+              {isMobile && (
+                <motion.button whileTap={{ scale: 0.92 }} onClick={onExit}
+                  aria-label="Выход"
+                  style={{ width: 42, height: 42, borderRadius: 13, background: "rgba(230,57,70,0.12)", border: "1px solid rgba(230,57,70,0.25)", color: "#e63946", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
+                  ⏻
+                </motion.button>
+              )}
           </div>
         </header>
 

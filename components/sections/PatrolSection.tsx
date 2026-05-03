@@ -163,13 +163,13 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                   <label className="text-[10px] text-white/35 uppercase tracking-widest font-medium">Охранник</label>
                   {employees.length > 0 ? (
                     <select value={form.guard} onChange={e => setForm({ ...form, guard: e.target.value })}
-                      className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all cursor-pointer">
+                      className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all cursor-pointer">
                       <option value="" className="bg-[#0a0a0f]">— Выберите —</option>
                       {employees.map(e => <option key={e.id} value={e.name} className="bg-[#0a0a0f]">{e.name}</option>)}
                     </select>
                   ) : (
                     <input placeholder="Имя охранника" value={form.guard} onChange={e => setForm({ ...form, guard: e.target.value })}
-                      className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
+                      className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
                   )}
                 </div>
                 {[
@@ -180,7 +180,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                     <label className="text-[10px] text-white/35 uppercase tracking-widest font-medium">{f.label}</label>
                     <input placeholder={f.placeholder} value={(form as any)[f.key]}
                       onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                      className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
+                      className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] placeholder-white/20 outline-none transition-all" />
                   </div>
                 ))}
                 <div className="space-y-1.5">
@@ -188,7 +188,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                   <select
                     value={form.status}
                     onChange={e => setForm({ ...form, status: e.target.value })}
-                    className="w-full bg-white/[0.04] border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all appearance-none cursor-pointer"
+                    className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all appearance-none cursor-pointer"
                   >
                     <option value="pending" className="bg-[#0a0a0f]">Ожидает</option>
                     <option value="in_progress" className="bg-[#0a0a0f]">В обходе</option>
@@ -201,7 +201,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                 <motion.button
                   onClick={save} disabled={saving}
                   whileHover={{ scale: saving ? 1 : 1.02 }} whileTap={{ scale: saving ? 1 : 0.97 }}
-                  className="flex-1 py-4 bg-white text-black rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-50"
+                  className="flex-1 py-4 bg-gradient-to-br from-[#4f8ef7] to-[#2563eb] text-white rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 shadow-lg shadow-[#4f8ef7]/30 hover:from-[#5a96f8] hover:to-[#2d6ee5] transition-all disabled:opacity-50"
                 >
                   {saving && <Loader2 size={14} className="animate-spin" />}
                   Сохранить запись
@@ -209,7 +209,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                 <motion.button
                   onClick={cancelForm}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                  className="px-6 py-4 bg-white/[0.04] border border-white/8 text-white/50 rounded-2xl text-[15px] hover:text-white/80 transition-all"
+                  className="px-6 py-4 bg-white/4 border border-white/8 text-white/50 rounded-2xl text-[15px] hover:text-white/80 transition-all"
                 >
                   Отмена
                 </motion.button>
@@ -224,7 +224,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
         <div className="flex justify-center py-16"><Loader2 className="animate-spin text-white/20" size={28} /></div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/6 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-white/3 border border-white/6 flex items-center justify-center">
             <MapPin size={22} className="text-white/20" />
           </div>
           <p className="text-sm text-white/25">Обходов не найдено</p>
@@ -244,7 +244,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: i * 0.04 }}
-                className={`bg-white/[0.035] border rounded-2xl overflow-hidden transition-all group ${isExpanded ? "border-white/12" : "border-white/8 hover:border-white/15"}`}
+                className={`bg-white/3.5 border rounded-2xl overflow-hidden transition-all group ${isExpanded ? "border-white/12" : "border-white/8 hover:border-white/15"}`}
                 style={{ boxShadow: "0 1px 0 rgba(255,255,255,0.04)" }}
               >
                 <div

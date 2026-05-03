@@ -99,7 +99,7 @@ export default function PhotoReportSection({ city, companyId }: { city: string; 
               <FileUpload recordId={pendingId || undefined} companyId={companyId} files={[]} />
               <div className="flex gap-2 pt-4">
                 <motion.button onClick={save} disabled={saving} whileHover={{ scale: saving ? 1 : 1.02 }} whileTap={{ scale: saving ? 1 : 0.97 }}
-                  className="flex-1 py-4 bg-white text-black rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition-all">
+                  className="flex-1 py-4 bg-liner-to-br from-[#4f8ef7] to-[#2563eb] text-white rounded-2xl text-[15px] font-semibold flex items-center justify-center gap-2 shadow-lg shadow-[#4f8ef7]/30 hover:from-[#5a96f8] hover:to-[#2d6ee5] transition-all">
                   {saving ? <Loader2 size={14} className="animate-spin" /> : null} Сохранить запись
                 </motion.button>
                 <motion.button onClick={cancelForm} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
@@ -114,11 +114,11 @@ export default function PhotoReportSection({ city, companyId }: { city: string; 
         : records.length === 0 ? <div className="text-center py-14 text-white/20 flex flex-col items-center gap-3"><Camera size={36} className="opacity-30" /><span className="text-sm">Нарушений нет</span></div>
           : <div className="flex flex-col gap-4">{records.map((r, i) => (
             <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: i * 0.04 }}
-              className="bg-white/[0.035] border border-white/8 hover:border-white/15 rounded-2xl p-3.5 sm:p-4 group transition-all"
+              className="bg-white/3.5 border border-white/8 hover:border-white/15 rounded-2xl p-3.5 sm:p-4 group transition-all"
               style={{ boxShadow: "0 1px 0 rgba(255,255,255,0.04)" }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0"><Camera size={16} className="text-orange-400" /></div>
+                  <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0"><Camera size={16} className="text-orange-400" /></div>
                   <div className="min-w-0">
                     <p className="text-white text-sm font-medium truncate">{r.data.violation_type}</p>
                     <p className="text-white/30 text-xs truncate">{r.data.location}{r.data.description ? ` · ${r.data.description}` : ""}</p>

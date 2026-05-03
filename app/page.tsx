@@ -184,7 +184,7 @@ export default function Home() {
 
   // Restore session on page load from auth cookie
   useEffect(() => {
-    fetch("/api/auth").then(r => r.ok ? r.json() : null).then(data => {
+    fetch("/api/auth").then(r => r.ok ? r.json() : null).then(async data => {
       if (!data?.authenticated) return;
       const u = data.user;
       if (u.is_admin) { setIsAdmin(true); return; }
@@ -195,6 +195,23 @@ export default function Home() {
         allowedCities: u.allowed_cities || [],
         allowedCompanies: u.allowed_companies || [],
       });
+      // Restore last selected city/company so refresh keeps the office user inside their workspace
+      try {
+        const savedCity = localStorage.getItem(`oxr_city_${u.id}`);
+        const savedCompanyId = localStorage.getItem(`oxr_company_${u.id}`);
+        if (savedCity) {
+          const c = JSON.parse(savedCity);
+          setCity(c);
+          if (savedCompanyId) {
+            const coRes = await fetch(`/api/companies?id=${savedCompanyId}`);
+            if (coRes.ok) {
+              const co = await coRes.json();
+              if (co?.id) { setCompany(co); return; }
+            }
+          }
+          setStep("company");
+        }
+      } catch {}
     }).catch(() => {});
   }, []);
 
@@ -316,7 +333,9 @@ export default function Home() {
 
 
   const handleSelectCity = async (c: City) => {
-    setCity({ id: c.id, label: c.label });
+    const cityState = { id: c.id, label: c.label };
+    setCity(cityState);
+    if (currentUser) try { localStorage.setItem(`oxr_city_${currentUser.id}`, JSON.stringify(cityState)); } catch {}
     const res = await fetch(`/api/companies?cityId=${c.id}`);
     const cityCompanies: Company[] = await res.json();
     const allowed = currentUser && currentUser.allowedCompanies.length > 0
@@ -380,6 +399,7 @@ export default function Home() {
 
   const handleLogout = async () => {
     try { await fetch("/api/auth", { method: "DELETE" }); } catch {}
+    if (currentUser) try { localStorage.removeItem(`oxr_city_${currentUser.id}`); localStorage.removeItem(`oxr_company_${currentUser.id}`); } catch {}
     setCity(null); setCompany(null); setCurrentUser(null);
     setStep("auth"); setMode("login"); setLogin(""); setUserPass(""); setCompanies([]);
   };
@@ -387,7 +407,10 @@ export default function Home() {
   if (isAdmin) return <AdminPanel onExit={async () => { try { await fetch("/api/auth", { method: "DELETE" }); } catch {} setIsAdmin(false); setAdminCode(""); setMode("login"); }} />;
   if (company && city && currentUser) return (
     <Dashboard city={city.id} cityLabel={city.label} company={company} currentUser={currentUser}
-      onCityChange={() => { setCompany(null); setStep("company"); }} onLogout={handleLogout} />
+      onCityChange={() => {
+        if (currentUser) try { localStorage.removeItem(`oxr_company_${currentUser.id}`); } catch {}
+        setCompany(null); setStep("company");
+      }} onLogout={handleLogout} />
   );
 
   return (
@@ -998,7 +1021,12 @@ export default function Home() {
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {!isEditingCompany ? (
                   <>
-                    <GradBtn onClick={() => setCompany(selectedCompanyForDetails)}
+                    <GradBtn onClick={() => {
+                      setCompany(selectedCompanyForDetails);
+                      if (currentUser && selectedCompanyForDetails) {
+                        try { localStorage.setItem(`oxr_company_${currentUser.id}`, selectedCompanyForDetails.id); } catch {}
+                      }
+                    }}
                       gradient="linear-gradient(135deg, #4f8ef7, #2563eb)"
                       shadow="0 8px 28px rgba(79,142,247,0.4)">
                       Войти в панель →

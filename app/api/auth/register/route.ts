@@ -32,12 +32,9 @@ export async function POST(req: NextRequest) {
     const password_hash = await bcrypt.hash(password, 12);
     const id = "usr_" + Date.now() + "_" + Math.random().toString(36).substring(2,9);
 
-    const allowed_sections = [
-      "passes", "schedule", "violations", "fuel", "vehicles", 
-      "night_checks", "tabel", "documents", "finances", 
-      "passes_permanent", "weapon", "seal", "tmd", "racer", "alcohol",
-      "employees", "reports", "settings"
-    ];
+    // Empty array = full access to all non-admin sections (Dashboard.tsx filter logic).
+    // Owner of the company should see every section their team uses.
+    const allowed_sections: string[] = [];
 
     // FIX: Do not store plain_password to DB (set as [HIDDEN] for compatibility if column is required)
     await query(

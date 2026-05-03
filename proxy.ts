@@ -29,7 +29,7 @@ function applySecurityHeaders(response: NextResponse, cspHeader: string) {
   return response;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const cspHeader = `

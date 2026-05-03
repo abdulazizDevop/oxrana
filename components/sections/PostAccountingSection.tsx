@@ -115,7 +115,7 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
         <motion.button
           whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 bg-white/[0.07] hover:bg-white/[0.12] border border-white/10 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all"
+          className="flex items-center gap-2 bg-white/7 hover:bg-white/12 border border-white/10 rounded-xl px-4 py-2 text-sm font-semibold text-white transition-all"
         >
           <Plus size={16} /> Добавить сотрудника
         </motion.button>
@@ -127,18 +127,18 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
           value={objectName}
           onChange={e => setObjectName(e.target.value)}
           placeholder="Название объекта (напр. Стройка объект №1)"
-          className="flex-1 min-w-[200px] bg-white/[0.04] border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-white/20"
+          className="flex-1 min-w-[200px] bg-white/4 border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-white/20"
         />
         <input
           value={postNumber}
           onChange={e => setPostNumber(e.target.value)}
           placeholder="Пост (напр. Пост №1)"
-          className="w-44 bg-white/[0.04] border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-white/20"
+          className="w-44 bg-white/4 border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-white/20"
         />
       </div>
 
       {/* Month navigator */}
-      <div className="flex items-center gap-3 bg-white/[0.03] border border-white/8 rounded-2xl px-4 py-3">
+      <div className="flex items-center gap-3 bg-white/3 border border-white/8 rounded-2xl px-4 py-3">
         <motion.button whileTap={{ scale: 0.9 }} onClick={prevMonth}
           className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-all">
           <ChevronLeft size={18} />
@@ -154,7 +154,7 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
 
       {/* Print header block */}
       {(objectName || postNumber) && (
-        <div className="bg-white/[0.025] border border-white/6 rounded-2xl px-5 py-4 text-white/70 text-sm space-y-1">
+        <div className="bg-white/2.5 border border-white/6 rounded-2xl px-5 py-4 text-white/70 text-sm space-y-1">
           {objectName && <div className="font-semibold text-white">{objectName}</div>}
           {postNumber && <div className="text-white/50">{postNumber}</div>}
           <div className="text-white/40 text-xs mt-1">
@@ -174,7 +174,7 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
           <div className="text-sm">Нет записей за {MONTH_NAMES[month - 1]} {year}</div>
           <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
             onClick={() => setShowAddModal(true)}
-            className="mt-2 px-4 py-2 bg-white/[0.06] border border-white/10 rounded-xl text-sm text-white/60 hover:text-white transition-all">
+            className="mt-2 px-4 py-2 bg-white/6 border border-white/10 rounded-xl text-sm text-white/60 hover:text-white transition-all">
             + Добавить сотрудника
           </motion.button>
         </div>
@@ -182,7 +182,7 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
         <div className="overflow-x-auto rounded-2xl border border-white/8">
           <table className="w-full text-sm border-collapse" style={{ minWidth: 900 }}>
             <thead>
-              <tr className="bg-white/[0.05]">
+              <tr className="bg-white/5">
                 <th className="text-left px-3 py-3 text-white/50 font-semibold border-b border-r border-white/8 whitespace-nowrap" style={{ minWidth: 36 }}>№</th>
                 <th className="text-left px-3 py-3 text-white/50 font-semibold border-b border-r border-white/8 whitespace-nowrap" style={{ minWidth: 160 }}>Ф.И.О.</th>
                 <th className="text-left px-3 py-3 text-white/50 font-semibold border-b border-r border-white/8 whitespace-nowrap" style={{ minWidth: 100 }}>Пост</th>
@@ -199,7 +199,7 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
               {records.map((r, idx) => (
                 <motion.tr key={r.id}
                   initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: idx * 0.03 }}
-                  className="border-b border-white/5 hover:bg-white/[0.025] transition-colors group">
+                  className="border-b border-white/5 hover:bg-white/2.5 transition-colors group">
                   <td className="px-3 py-2.5 text-white/30 text-center border-r border-white/5">{idx + 1}</td>
                   <td className="px-3 py-2.5 text-white font-medium border-r border-white/5 whitespace-nowrap">{r.employee_name}</td>
                   <td className="px-3 py-2.5 text-white/50 border-r border-white/5 whitespace-nowrap">{r.post_name}</td>
@@ -253,7 +253,7 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
       {/* Summary footer */}
       {records.length > 0 && (
         <div className="flex justify-end">
-          <div className="bg-white/[0.04] border border-white/8 rounded-xl px-5 py-3 text-sm text-white/60">
+          <div className="bg-white/4 border border-white/8 rounded-xl px-5 py-3 text-sm text-white/60">
             Всего сотрудников: <span className="text-white font-bold ml-1">{records.length}</span>
             <span className="mx-3 text-white/20">·</span>
             Итого часов: <span className="text-cyan-400 font-bold ml-1">
@@ -291,7 +291,7 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
                     onChange={e => setNewName(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && addEmployee()}
                     placeholder="Например: Иванов Иван"
-                    className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-5 py-4 text-[15px] text-white placeholder:text-white/20 outline-none focus:border-white/25"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-[15px] text-white placeholder:text-white/20 outline-none focus:border-white/25"
                   />
                 </div>
                 <div>
@@ -301,17 +301,17 @@ export default function PostAccountingSection({ city, companyId }: { city: strin
                     onChange={e => setNewPost(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && addEmployee()}
                     placeholder="Пост №1"
-                    className="w-full bg-white/[0.05] border border-white/10 rounded-xl px-5 py-4 text-[15px] text-white placeholder:text-white/20 outline-none focus:border-white/25"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-[15px] text-white placeholder:text-white/20 outline-none focus:border-white/25"
                   />
                 </div>
                 <div className="flex gap-3 pt-1">
                   <button onClick={() => { setShowAddModal(false); setNewName(""); setNewPost(""); }}
-                    className="flex-1 bg-white/[0.04] border border-white/8 rounded-xl py-3 text-sm text-white/50 hover:text-white transition-all">
+                    className="flex-1 bg-white/4 border border-white/8 rounded-xl py-3 text-sm text-white/50 hover:text-white transition-all">
                     Отмена
                   </button>
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                     onClick={addEmployee} disabled={saving || !newName.trim()}
-                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2">
+                    className="flex-1 bg-linear-to-r from-blue-500 to-blue-600 rounded-xl py-3 text-sm font-semibold text-white disabled:opacity-50 flex items-center justify-center gap-2">
                     {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={15} />}
                     Добавить
                   </motion.button>
