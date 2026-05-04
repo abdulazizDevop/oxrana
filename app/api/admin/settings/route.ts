@@ -2,17 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { requireAuth, requireAdmin } from '@/lib/auth';
 
+// Public-readable settings (subscription contact info etc.) — Dashboard fetches these
+// for every logged-in user, including non-admin office accounts.
+const PUBLIC_SETTING_IDS = ['subscription_phone', 'subscription_card', 'subscription_price'];
+
 export async function GET(req: NextRequest) {
   try {
     const auth = await requireAuth(req);
     if (auth instanceof NextResponse) return auth;
 
     const res = await query('SELECT id, value FROM admin_settings');
-    const settings = res.rows.reduce((acc: any, row: any) => {
+    const all = res.rows.reduce((acc: any, row: any) => {
       acc[row.id] = row.value;
       return acc;
     }, {});
-    return NextResponse.json(settings);
+
+    // Non-admin users only see the public allow-list (avoids leaking admin-only settings).
+    if (!auth.payload.is_admin) {
+      const filtered: any = {};
+      for (const id of PUBLIC_SETTING_IDS) if (id in all) filtered[id] = all[id];
+      return NextResponse.json(filtered);
+    }
+    return NextResponse.json(all);
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

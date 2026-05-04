@@ -174,30 +174,32 @@ export default function EmployeesSection({ city, companyId, currentUser }: { cit
       {loading ? <div style={{ color: "#aaa", textAlign: "center", padding: 20 }}>Загрузка...</div> : users.length === 0 ? <div style={{ color: "#aaa", textAlign: "center", padding: 20, background: "rgba(255,255,255,0.02)", borderRadius: 16, border: "1px dashed rgba(255,255,255,0.05)" }}>Нет сотрудников. Нажмите «Новый сотрудник», чтобы выдать доступы.</div> : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {users.map(u => (
-              <div key={u.id} style={{ display: "flex", flexDirection: "column", gap: 10, background: "rgba(255,255,255,0.03)", padding: 18, borderRadius: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: "#fff", marginBottom: 4 }}>{u.name} <span style={{ fontSize: 12, fontWeight: 500, color: "#a855f7", background: "rgba(168,85,247,0.15)", padding: "2px 8px", borderRadius: 20, marginLeft: 8 }}>{u.profession || u.role}</span></div>
-                    <div style={{ fontSize: 13, color: "#a0a0b8", display: "flex", gap: 12 }}>
+              <div key={u.id} style={{ display: "flex", flexDirection: "column", gap: 12, background: "rgba(255,255,255,0.03)", padding: 16, borderRadius: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+                  <div style={{ flex: "1 1 200px", minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: "#fff", marginBottom: 4, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 6 }}>
+                      <span>{u.name}</span>
+                      <span style={{ fontSize: 11, fontWeight: 500, color: "#a855f7", background: "rgba(168,85,247,0.15)", padding: "2px 8px", borderRadius: 20 }}>{u.profession || u.role}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: "#a0a0b8", display: "flex", flexWrap: "wrap", gap: "4px 12px" }}>
                       <span>Логин: <strong style={{color:"#e8e8f0"}}>{u.login}</strong></span>
                       <span>Секций: <strong style={{color:"#e8e8f0"}}>{u.allowedSections?.length || u.allowed_sections?.length || 0}</strong></span>
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                      <button onClick={() => viewingScheduleId === u.id ? setViewingScheduleId(null) : fetchEmpSchedule(u.name, u.id)} style={{ padding: "8px 12px", background: "rgba(96,165,250,0.1)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.2)", borderRadius: 10, fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
-                        {viewingScheduleId === u.id ? "Скрыть график" : "График"}
-                      </button>
-                      <button onClick={() => openEdit(u)} style={{ padding: "8px 12px", background: "rgba(255,255,255,0.05)", color: "#e8e8f0", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, fontSize: 13, cursor: "pointer", fontWeight: 600, transition: "all 0.2s" }}
-                        onMouseOver={e => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
-                        onMouseOut={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}>
-                        Изменить
-                      </button>
-                      <button onClick={() => handleDelete(u.id)} style={{ padding: "8px 12px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, fontSize: 13, cursor: "pointer", fontWeight: 600, transition: "all 0.2s" }}
-                    onMouseOver={e => e.currentTarget.style.background = "rgba(239,68,68,0.2)"}
-                    onMouseOut={e => e.currentTarget.style.background = "rgba(239,68,68,0.1)"}>
-                    Удалить
-                  </button>
-                </div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <button onClick={() => viewingScheduleId === u.id ? setViewingScheduleId(null) : fetchEmpSchedule(u.name, u.id)}
+                      style={{ padding: "7px 10px", background: "rgba(96,165,250,0.1)", color: "#60a5fa", border: "1px solid rgba(96,165,250,0.2)", borderRadius: 10, fontSize: 12, cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap" }}>
+                      {viewingScheduleId === u.id ? "Скрыть" : "График"}
+                    </button>
+                    <button onClick={() => openEdit(u)}
+                      style={{ padding: "7px 10px", background: "rgba(255,255,255,0.05)", color: "#e8e8f0", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, fontSize: 12, cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap" }}>
+                      Изменить
+                    </button>
+                    <button onClick={() => handleDelete(u.id)}
+                      style={{ padding: "7px 10px", background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, fontSize: 12, cursor: "pointer", fontWeight: 600, whiteSpace: "nowrap" }}>
+                      Удалить
+                    </button>
+                  </div>
                 </div>
 
                 {viewingScheduleId === u.id && (
