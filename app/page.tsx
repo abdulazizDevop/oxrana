@@ -146,7 +146,13 @@ export default function Home() {
   const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);
-  const [step, setStep] = useState<"auth" | "city" | "company">("auth");
+  const [step, _setStep] = useState<"auth" | "city" | "company">("auth");
+  // Wrap setStep to clear the company search whenever we enter the company step,
+  // defending against iOS Safari autofilling the field with the user's display name.
+  const setStep = (s: "auth" | "city" | "company") => {
+    if (s === "company") setCompanySearch("");
+    _setStep(s);
+  };
   const [city, setCity] = useState<{ id: string; label: string } | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [selectedCompanyForDetails, setSelectedCompanyForDetails] = useState<Company | null>(null);
@@ -225,7 +231,9 @@ export default function Home() {
       }));
       if (loaded.length > 0) setCities(loaded);
     }).catch(() => {});
-  }, [currentUser, isAdmin]);
+    // Depend on the user identity, not the full object — otherwise every setCurrentUser
+    // (e.g. after creating a company) re-triggers the city fetch and can stall the UI.
+  }, [currentUser?.id, isAdmin]);
 
   const handleAdminLogin = async () => {
     try {
@@ -789,8 +797,10 @@ export default function Home() {
                 <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
                   <div style={{ position: "relative", flex: 1 }}>
                     <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16, opacity: 0.4 }}>🔍</span>
-                    <input type="text" value={companySearch} onChange={e => setCompanySearch(e.target.value)}
+                    <input type="search" value={companySearch} onChange={e => setCompanySearch(e.target.value)}
                       placeholder="Поиск компании..."
+                      name="company-search-q"
+                      autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false}
                       style={{ width: "100%", background: "rgba(255,255,255,0.055)", border: "1.5px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: "12px 14px 12px 40px", fontSize: 14, color: "#f0f0f8", outline: "none", boxSizing: "border-box" }}
                     />
                   </div>
