@@ -319,8 +319,8 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
           {/* Nav */}
           <nav style={{ flex: 1, padding: "4px 8px", overflowY: "auto" }}>
             {[
-              { id: "monitoring", label: "Мониторинг", sections: ["transport","patrol","admin_log","photo"] },
-              { id: "management", label: "Управление",  sections: ["shift","posts","apartment","inventory","schedule","fines","expenses","work_schedule","post_accounting"] },
+              { id: "monitoring", label: "Мониторинг", sections: ["transport","patrol","admin_log","photo","conference"] },
+              { id: "management", label: "Управление",  sections: ["shift","posts","apartment","inventory","schedule","fines","expenses","work_schedule","post_accounting","employees"] },
             ].map(group => {
               const items = allowedMenu.filter(m => group.sections.includes(m.id));
               if (items.length === 0) return null;
