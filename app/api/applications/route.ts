@@ -22,6 +22,24 @@ export async function POST(req: NextRequest) {
       'INSERT INTO connection_applications (name, phone, object_name, address, user_id, type, company_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
       [name, phone, object_name, address || '', userId || null, type || 'connect', companyId || null]
     );
+
+    // Notify admins immediately so they don't only see new applications when they manually open the panel.
+    // Fire-and-forget — failure here must not block the application response.
+    const reqType = type || 'connect';
+    const titleByType: Record<string, string> = {
+      connect: '📝 Новая заявка на подключение',
+      new_object: '🏗️ Заявка на новый объект',
+      subscription: '💳 Заявка на продление подписки',
+    };
+    const title = titleByType[reqType] || '📝 Новая заявка';
+    const body = `${name} · ${phone}${object_name ? ' · ' + object_name : ''}`;
+    const origin = req.nextUrl.origin;
+    fetch(`${origin}/api/push/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, body, urgent: true, adminOnly: true }),
+    }).catch(() => {});
+
     return NextResponse.json(res.rows[0]);
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

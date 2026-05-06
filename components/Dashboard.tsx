@@ -831,7 +831,7 @@ function MobileLayout({
   onCityChange: () => void; menu: typeof MENU; currentUser: AppUser; onLogout: () => void;
   emergencyAlert: EmergencyAlert | null; onEmergency: () => void; onResolve: () => void;
   emConfirm: boolean; setEmConfirm: (v: boolean) => void; emSending: boolean; triggerEmergency: () => void;
-  onRequest: () => void;
+  onRequest: (type?: "connect" | "new_object" | "subscription") => void;
 }) {
   const activeItem = MENU.find(m => m.id === active);
 
@@ -974,7 +974,7 @@ function MobileLayout({
    MOBILE HOME GRID — стиль Family Bicycles
 ═══════════════════════════════════════════════════════ */
 function MobileHomeGrid({ setActive, menu, currentUser, onLogout, onRequest }: {
-  setActive: (id: string) => void; menu: typeof MENU; currentUser: AppUser; onLogout: () => void; onRequest: () => void;
+  setActive: (id: string) => void; menu: typeof MENU; currentUser: AppUser; onLogout: () => void; onRequest: (type?: "connect" | "new_object" | "subscription") => void;
 }) {
   return (
     <div>
@@ -988,7 +988,7 @@ function MobileHomeGrid({ setActive, menu, currentUser, onLogout, onRequest }: {
             <p style={{ color: "#404058", fontSize: 12, marginTop: 4 }}>Система мониторинга объектов</p>
           </div>
           <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
-            <motion.button whileTap={{ scale: 0.92 }} onClick={onRequest}
+            <motion.button whileTap={{ scale: 0.92 }} onClick={() => onRequest("connect")}
               style={{ background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)", borderRadius: 14, padding: "10px 14px", color: "#34d399", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
               Заявка
             </motion.button>

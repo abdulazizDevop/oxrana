@@ -62,12 +62,25 @@ export async function GET(req: NextRequest) {
 
     // Filter users by allowed cities/companies if not admin
     if (!payload.is_admin) {
-      const userCities = (payload.allowed_cities as string[]) || [];
-      const userCompanies = (payload.allowed_companies as string[]) || [];
-    
-    if (userCities.length === 0 || userCompanies.length === 0) {
-      return NextResponse.json([]); // return empty if user has no access to any companies/cities
-    }
+      let userCities = (payload.allowed_cities as string[]) || [];
+      let userCompanies = (payload.allowed_companies as string[]) || [];
+
+      // JWT may be stale (issued before the user created their first company).
+      // Fall back to the current DB row so the employee list isn't artificially empty.
+      if (userCities.length === 0 || userCompanies.length === 0) {
+        const fresh = await query(
+          'SELECT allowed_cities, allowed_companies FROM app_users WHERE id = $1',
+          [payload.id]
+        );
+        if (fresh.rows[0]) {
+          userCities = fresh.rows[0].allowed_cities || [];
+          userCompanies = fresh.rows[0].allowed_companies || [];
+        }
+      }
+
+      if (userCities.length === 0 || userCompanies.length === 0) {
+        return NextResponse.json([]);
+      }
 
     const res = await query(
       'SELECT id, name, role, profession, login, allowed_sections, allowed_cities, allowed_companies, is_admin, created_at FROM app_users ORDER BY created_at DESC'
