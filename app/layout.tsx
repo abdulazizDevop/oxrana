@@ -45,9 +45,18 @@ export default function RootLayout({
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js').then(function(reg) {
-                  console.log('SW registered');
-                }).catch(function(err) {
-                  console.log('SW error:', err);
+                  // Force the registration to check for SW updates on every load
+                  reg.update().catch(function(){});
+                }).catch(function(){});
+
+                // When the new SW posts SW_UPDATED, reload the page so the user sees the latest bundle.
+                // Use a flag to avoid an infinite reload loop if the message fires multiple times.
+                var reloaded = false;
+                navigator.serviceWorker.addEventListener('message', function(event) {
+                  if (event.data && event.data.type === 'SW_UPDATED' && !reloaded) {
+                    reloaded = true;
+                    window.location.reload();
+                  }
                 });
               });
             }
