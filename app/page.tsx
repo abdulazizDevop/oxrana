@@ -430,6 +430,27 @@ export default function Home() {
         overflowX: "hidden", width: "100%"
       }}>
         <Background />
+        {/* Manual cache-clear escape hatch — visible on every screen for users stuck on a stale iOS PWA bundle */}
+        <button onClick={async () => {
+          if (typeof window === "undefined") return;
+          if (!confirm("Обновить приложение до последней версии? (очистит кеш)")) return;
+          try {
+            if ("serviceWorker" in navigator) {
+              const regs = await navigator.serviceWorker.getRegistrations();
+              await Promise.all(regs.map(r => r.unregister()));
+            }
+            if ("caches" in window) {
+              const keys = await caches.keys();
+              await Promise.all(keys.map(k => caches.delete(k)));
+            }
+          } catch {}
+          window.location.href = window.location.pathname + "?v=" + Date.now();
+        }}
+          aria-label="Обновить приложение"
+          title="Очистить кеш и перезагрузить"
+          style={{ position: "fixed", top: "max(14px, env(safe-area-inset-top, 14px))", right: 14, zIndex: 9999, width: 38, height: 38, borderRadius: 12, border: "1px solid rgba(96,165,250,0.3)", background: "rgba(96,165,250,0.15)", color: "#60a5fa", fontSize: 16, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(12px)" }}>
+          ↻
+        </button>
 
               {showFaceCheck && pendingUser && (
         <FaceCheckModal

@@ -63,6 +63,26 @@ function getSectionMap(city: string, companyId?: string, currentUser?: AppUser):
   };
 }
 
+// Manual escape hatch for stuck iOS PWA clients: unregister the SW, drop every cache,
+// then hard-reload so the next start downloads the freshest bundle.
+async function hardResetApp() {
+  if (typeof window === "undefined") return;
+  if (!confirm("Обновить приложение до последней версии? (очистит кеш)")) return;
+  try {
+    if ("serviceWorker" in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if ("caches" in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    try { localStorage.removeItem("admin_tab"); } catch {}
+  } catch {}
+  // Bypass HTTP cache by appending a cache-busting query param on reload.
+  window.location.href = window.location.pathname + "?v=" + Date.now();
+}
+
 type EmergencyAlert = { id: string; triggered_by: string; triggered_by_role: string; message: string; created_at: string; };
 
 export default function Dashboard({ city, cityLabel, company, currentUser, onCityChange, onLogout }: {
@@ -988,6 +1008,12 @@ function MobileHomeGrid({ setActive, menu, currentUser, onLogout, onRequest }: {
             <p style={{ color: "#404058", fontSize: 12, marginTop: 4 }}>Система мониторинга объектов</p>
           </div>
           <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
+            <motion.button whileTap={{ scale: 0.88 }} onClick={hardResetApp}
+              aria-label="Обновить приложение"
+              title="Очистить кеш и перезагрузить"
+              style={{ background: "rgba(96,165,250,0.12)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 14, width: 38, height: 38, color: "#60a5fa", fontSize: 16, cursor: "pointer", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              ↻
+            </motion.button>
             <motion.button whileTap={{ scale: 0.92 }} onClick={() => onRequest("connect")}
               style={{ background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)", borderRadius: 14, padding: "10px 14px", color: "#34d399", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
               Заявка
