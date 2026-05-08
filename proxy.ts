@@ -92,9 +92,16 @@ export async function proxy(request: NextRequest) {
       const isAdmin = payload?.is_admin === true;
       const allowedSections = (payload?.allowed_sections as string[]) || [];
       
-      // Protect Admin-Only Routes
-      const adminOnlyPrefixes = ['/api/admin', '/api/cameras', '/api/seed-test-users'];
+      // Protect Admin-Only Routes.
+      // /api/admin/settings is special: GET is allowed for any logged-in user (returns only the
+      // public allow-list — see route handler), POST is admin-only. So we let everything through
+      // here and the route enforces. The other admin endpoints stay strictly admin.
+      const adminOnlyPrefixes = ['/api/admin/expenses', '/api/admin/log', '/api/cameras', '/api/seed-test-users'];
       if (!isAdmin && adminOnlyPrefixes.some(prefix => pathname.startsWith(prefix))) {
+        return applySecurityHeaders(NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 }), cspHeader);
+      }
+      // /api/admin/settings: only POST/PUT/PATCH/DELETE require admin
+      if (!isAdmin && pathname.startsWith('/api/admin/settings') && method !== 'GET') {
         return applySecurityHeaders(NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 }), cspHeader);
       }
 

@@ -94,6 +94,9 @@ export function RequestModal({ isOpen, onClose, userId, type = "connect", compan
   const [reqSuccess, setReqSuccess] = useState(false);
   const [isSubmittingReq, setIsSubmittingReq] = useState(false);
 
+  // Diagnostic: log when this modal mounts so we know the component reached the render path.
+  if (typeof window !== "undefined" && isOpen) console.log("[RequestModal] render isOpen=true type=", type);
+
   const handleSubmitRequest = async () => {
     if (type === "connect" || type === "new_object") {
       if (!reqName.trim() || !reqPhone.trim() || !reqObject.trim() || !reqAddress.trim()) {

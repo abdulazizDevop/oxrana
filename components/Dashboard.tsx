@@ -292,7 +292,11 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onLog
           menu={allowedMenu} currentUser={currentUser} onLogout={onLogout}
           emergencyAlert={emergencyAlert} onEmergency={() => setEmConfirm(true)} onResolve={resolveEmergency}
           emConfirm={emConfirm} setEmConfirm={setEmConfirm} emSending={emSending} triggerEmergency={triggerEmergency}
-          onRequest={(type: "connect" | "new_object" | "subscription" = "connect") => { setRequestType(type); setShowRequestModal(true); }}
+          onRequest={(type: "connect" | "new_object" | "subscription" = "connect") => {
+            console.log("[Dashboard] onRequest called type=", type);
+            setRequestType(type);
+            setShowRequestModal(true);
+          }}
         />
       </>
     );
@@ -1027,7 +1031,7 @@ function MobileHomeGrid({ setActive, menu, currentUser, onLogout, onRequest }: {
             <p style={{ color: "#404058", fontSize: 12, marginTop: 4 }}>Система мониторинга объектов</p>
           </div>
           <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
-            <motion.button whileTap={{ scale: 0.92 }} onClick={() => onRequest("connect")}
+            <motion.button whileTap={{ scale: 0.92 }} onClick={() => { console.log("[Заявка-btn] click"); onRequest("connect"); }}
               style={{ background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)", borderRadius: 14, padding: "10px 14px", color: "#34d399", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
               Заявка
             </motion.button>

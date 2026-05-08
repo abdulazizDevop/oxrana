@@ -1,5 +1,5 @@
 // Bump this on every deploy to force iOS Safari PWA clients to drop their stale JS bundles.
-const CACHE_NAME = 'oxrana-v3-2026-05-07';
+const CACHE_NAME = 'oxrana-v4-2026-05-09';
 const STATIC_ASSETS = ['/manifest.json'];
 
 self.addEventListener('install', event => {
@@ -33,8 +33,13 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(event.request).catch(() => caches.match('/manifest.json')));
     return;
   }
-  // Other static assets: network first, no caching of new responses (Next.js serves hashed filenames).
-  event.respondWith(fetch(event.request).catch(() => caches.match(event.request) as Promise<Response>));
+  // Other static assets: network first, fall back to cache only if offline.
+  // (Plain JS — no TypeScript casts allowed in this file.)
+  event.respondWith(
+    fetch(event.request).catch(() =>
+      caches.match(event.request).then(r => r || Response.error())
+    )
+  );
 });
 
 // Push notifications
