@@ -94,9 +94,6 @@ export function RequestModal({ isOpen, onClose, userId, type = "connect", compan
   const [reqSuccess, setReqSuccess] = useState(false);
   const [isSubmittingReq, setIsSubmittingReq] = useState(false);
 
-  // Diagnostic: log when this modal mounts so we know the component reached the render path.
-  if (typeof window !== "undefined" && isOpen) console.log("[RequestModal] render isOpen=true type=", type);
-
   const handleSubmitRequest = async () => {
     if (type === "connect" || type === "new_object") {
       if (!reqName.trim() || !reqPhone.trim() || !reqObject.trim() || !reqAddress.trim()) {
@@ -121,30 +118,22 @@ export function RequestModal({ isOpen, onClose, userId, type = "connect", compan
       type,
       companyId,
     };
-    console.log("[Заявка] submit start", payload);
     try {
-      const t0 = performance.now();
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const elapsed = (performance.now() - t0).toFixed(0);
-      console.log(`[Заявка] response in ${elapsed}ms — status ${res.status}`);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        console.warn("[Заявка] server error:", data);
         setReqError(data.error || `Ошибка ${res.status} при отправке заявки`);
         return;
       }
-      const data = await res.json().catch(() => null);
-      console.log("[Заявка] success:", data);
       setReqSuccess(true);
       // Don't auto-close — keep success on screen so the user clearly sees the confirmation,
       // especially on a slow iPhone where they previously thought "nothing happened".
       // The OK button below lets them dismiss it themselves.
     } catch (e: any) {
-      console.error("[Заявка] network/JS error:", e);
       setReqError(e?.message || "Ошибка соединения");
     } finally {
       setIsSubmittingReq(false);

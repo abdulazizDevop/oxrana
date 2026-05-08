@@ -954,7 +954,6 @@ export default function AdminPanel({ onExit }: Props) {
                             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                             onClick={() => {
                               const next = selectedUser?.id === u.id ? null : u;
-                              console.log(`[admin/users] row click u=${u.id} (${u.login}) → ${next ? 'select' : 'deselect'}`);
                               setSelectedUser(next);
                               // On mobile the detail panel renders below the list — auto-scroll to it
                               // so the user actually sees what happened (otherwise the ✕ icon looks dead).

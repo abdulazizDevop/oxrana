@@ -293,7 +293,6 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onLog
           emergencyAlert={emergencyAlert} onEmergency={() => setEmConfirm(true)} onResolve={resolveEmergency}
           emConfirm={emConfirm} setEmConfirm={setEmConfirm} emSending={emSending} triggerEmergency={triggerEmergency}
           onRequest={(type: "connect" | "new_object" | "subscription" = "connect") => {
-            console.log("[Dashboard] onRequest called type=", type);
             setRequestType(type);
             setShowRequestModal(true);
           }}
@@ -1041,7 +1040,7 @@ function MobileHomeGrid({ setActive, menu, currentUser, onLogout, onRequest }: {
             <p style={{ color: "#404058", fontSize: 12, marginTop: 4 }}>Система мониторинга объектов</p>
           </div>
           <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
-            <motion.button whileTap={{ scale: 0.92 }} onClick={() => { console.log("[Заявка-btn] click"); onRequest("connect"); }}
+            <motion.button whileTap={{ scale: 0.92 }} onClick={() => onRequest("connect")}
               style={{ background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)", borderRadius: 14, padding: "10px 14px", color: "#34d399", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
               Заявка
             </motion.button>
@@ -1063,6 +1062,18 @@ function MobileHomeGrid({ setActive, menu, currentUser, onLogout, onRequest }: {
           {currentUser.is_admin && (
             <div style={{ marginLeft: "auto", background: "rgba(230,57,70,0.12)", border: "1px solid rgba(230,57,70,0.2)", borderRadius: 8, padding: "3px 8px", fontSize: 10, fontWeight: 700, color: "#e63946" }}>ADMIN</div>
           )}
+        </div>
+        {/* Mobile-only quick actions for adding an object / extending subscription —
+            previously these were only in the desktop sidebar so phone users couldn't reach them. */}
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          <motion.button whileTap={{ scale: 0.95 }} onClick={() => onRequest("new_object")}
+            style={{ flex: 1, background: "rgba(79,142,247,0.12)", border: "1px solid rgba(79,142,247,0.25)", borderRadius: 14, padding: "10px 12px", color: "#4f8ef7", fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+            🏗️ + Объект
+          </motion.button>
+          <motion.button whileTap={{ scale: 0.95 }} onClick={() => onRequest("subscription")}
+            style={{ flex: 1, background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.25)", borderRadius: 14, padding: "10px 12px", color: "#fbbf24", fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+            💳 Оплатить
+          </motion.button>
         </div>
       </div>
 
