@@ -33,7 +33,7 @@ const MENU = [
   { id: "expenses",      label: "Расходы",   fullLabel: "Расходы",         icon: "💰", color: "#fbbf24", bg: "rgba(251,191,36,0.15)",  adminOnly: true  },
   { id: "work_schedule", label: "Вахта",     fullLabel: "График вахт",     icon: "🗓️", color: "#22d3ee", bg: "rgba(34,211,238,0.15)",  adminOnly: true  },
   { id: "admin_log",     label: "Журнал",    fullLabel: "Журнал логов",    icon: "🗂️", color: "#4f8ef7", bg: "rgba(79,142,247,0.15)",  adminOnly: true  },
-  { id: "employees",     label: "Сотрудники", fullLabel: "Сотрудники",       icon: "👥", color: "#3b82f6", bg: "rgba(59,130,246,0.15)",  adminOnly: false },
+  { id: "employees",     label: "Офис",       fullLabel: "Офис",             icon: "👥", color: "#3b82f6", bg: "rgba(59,130,246,0.15)",  adminOnly: false },
   { id: "post_accounting", label: "Учёт поста", fullLabel: "Учёт поста",  icon: "📊", color: "#10b981", bg: "rgba(16,185,129,0.15)",  adminOnly: true  },
   { id: "conference",    label: "Конф.",     fullLabel: "Конференция",      icon: "🎥", color: "#7c3aed", bg: "rgba(124,58,237,0.15)",  adminOnly: false },
 ];

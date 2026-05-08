@@ -119,7 +119,7 @@ export default function EmployeesSection({ city, companyId, currentUser }: { cit
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: "#e8e8f0", margin: 0 }}>Сотрудники объекта</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: "#e8e8f0", margin: 0 }}>Офис объекта</h2>
         <motion.button onClick={() => { setEditingId(null); setShowForm(true); setForm({ name: "", login: "", password: "", role: "Охранник", profession: "", allowedSections: ["patrol", "shift", "posts"] }); }}
           whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }}
           style={{ padding: "13px 28px", borderRadius: 14, background: "rgba(79,142,247,0.12)", border: "1px solid rgba(79,142,247,0.3)", color: "#4f8ef7", fontSize: 15, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>

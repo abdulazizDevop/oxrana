@@ -572,7 +572,7 @@ export default function AdminPanel({ onExit }: Props) {
   ];
 
   const MGMT_TABS: { id: Tab; label: string; icon: string }[] = [
-    { id: "users", label: "Сотрудники", icon: "👥" },
+    { id: "users", label: "Офис", icon: "👥" },
     { id: "logins", label: "Логины и пароли", icon: "🔑" },
     { id: "companies", label: "Компании", icon: "🏢" },
     { id: "cameras", label: "Камеры", icon: "📹" },

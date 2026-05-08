@@ -43,8 +43,8 @@ self.addEventListener('push', event => {
   const title = data.title || '🚨 Глаза ЧОПа';
   const options = {
     body: data.body || 'Новое уведомление',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
+    icon: '/logo.png',
+    badge: '/logo.png',
     vibrate: [200, 100, 200, 100, 400],
     data: data,
     requireInteraction: data.urgent || false,
