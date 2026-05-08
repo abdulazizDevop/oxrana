@@ -298,6 +298,16 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onLog
             setShowRequestModal(true);
           }}
         />
+        {/* RequestModal must live on the mobile branch too — earlier it was only mounted in the
+            desktop return below, so on mobile setShowRequestModal(true) never produced any UI. */}
+        <RequestModal
+          isOpen={showRequestModal}
+          onClose={() => setShowRequestModal(false)}
+          userId={currentUser.id}
+          type={requestType}
+          companyId={company?.id}
+          defaultObjectName={company?.name}
+        />
       </>
     );
   }
