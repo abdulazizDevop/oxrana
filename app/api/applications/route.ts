@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
+import { sendPush } from '@/lib/push';
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,22 +24,18 @@ export async function POST(req: NextRequest) {
       [name, phone, object_name, address || '', userId || null, type || 'connect', companyId || null]
     );
 
-    // Notify admins immediately so they don't only see new applications when they manually open the panel.
-    // Fire-and-forget — failure here must not block the application response.
+    // Notify admins in the background. We call sendPush() directly (no HTTP roundtrip
+    // through nginx + sslip.io DNS) and intentionally don't await — the response returns
+    // immediately so iPhone PWA users don't see a 5-10s "loading" while we hit Apple/Google.
     const reqType = type || 'connect';
     const titleByType: Record<string, string> = {
       connect: '📝 Новая заявка на подключение',
       new_object: '🏗️ Заявка на новый объект',
       subscription: '💳 Заявка на продление подписки',
     };
-    const title = titleByType[reqType] || '📝 Новая заявка';
-    const body = `${name} · ${phone}${object_name ? ' · ' + object_name : ''}`;
-    const origin = req.nextUrl.origin;
-    fetch(`${origin}/api/push/send`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, body, urgent: true, adminOnly: true }),
-    }).catch(() => {});
+    const pushTitle = titleByType[reqType] || '📝 Новая заявка';
+    const pushBody = `${name} · ${phone}${object_name ? ' · ' + object_name : ''}`;
+    sendPush({ title: pushTitle, body: pushBody, urgent: true, adminOnly: true }).catch(() => {});
 
     return NextResponse.json(res.rows[0]);
   } catch (e: any) {

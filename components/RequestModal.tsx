@@ -129,16 +129,20 @@ export function RequestModal({ isOpen, onClose, userId, type = "connect", compan
         return;
       }
       setReqSuccess(true);
-      setTimeout(() => {
-        setReqSuccess(false);
-        setReqName(""); setReqPhone(""); setReqObject(""); setReqAddress("");
-        onClose();
-      }, 3000);
+      // Don't auto-close — keep success on screen so the user clearly sees the confirmation,
+      // especially on a slow iPhone where they previously thought "nothing happened".
+      // The OK button below lets them dismiss it themselves.
     } catch (e: any) {
       setReqError(e?.message || "Ошибка соединения");
     } finally {
       setIsSubmittingReq(false);
     }
+  };
+
+  const closeAndReset = () => {
+    setReqSuccess(false);
+    setReqName(""); setReqPhone(""); setReqObject(""); setReqAddress("");
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -194,10 +198,19 @@ export function RequestModal({ isOpen, onClose, userId, type = "connect", compan
           </div>
 
           {reqSuccess ? (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: "center", padding: "20px 0" }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>✅</div>
-              <div style={{ fontSize: 16, color: "#f0f0f8", fontWeight: 700 }}>Заявка отправлена!</div>
-              <div style={{ fontSize: 13, color: "#55556a", marginTop: 8 }}>Администратор скоро рассмотрит её</div>
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: "center", padding: "16px 0 4px" }}>
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 240, damping: 14 }}
+                style={{ width: 76, height: 76, margin: "0 auto 16px", borderRadius: 24, background: "linear-gradient(145deg, #34d399, #059669)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 42, boxShadow: "0 16px 40px rgba(52,211,153,0.4)" }}>
+                ✓
+              </motion.div>
+              <div style={{ fontSize: 20, color: "#f0f0f8", fontWeight: 800, marginBottom: 6 }}>Заявка отправлена!</div>
+              <div style={{ fontSize: 13, color: "#8888a0", marginBottom: 24, lineHeight: 1.5 }}>
+                Администратор получит уведомление и скоро её рассмотрит. Можете закрыть это окно.
+              </div>
+              <button onClick={closeAndReset}
+                style={{ width: "100%", padding: "14px 20px", borderRadius: 14, border: "none", background: "linear-gradient(135deg, #34d399, #059669)", color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer", boxShadow: "0 8px 24px rgba(52,211,153,0.3)" }}>
+                Готово
+              </button>
             </motion.div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -243,8 +256,14 @@ export function RequestModal({ isOpen, onClose, userId, type = "connect", compan
               <GradBtn onClick={handleSubmitRequest} disabled={isSubmittingReq}
                 gradient={`linear-gradient(135deg, ${accents[type]} 0%, ${accents[type]}cc 100%)`}
                 shadow={`0 8px 28px ${accents[type]}35`}>
-                {isSubmittingReq ? "Отправка..." : "Отправить заявку →"}
+                {isSubmittingReq ? (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ width: 16, height: 16, border: "2px solid rgba(255,255,255,0.3)", borderTop: "2px solid white", borderRadius: "50%", animation: "spin 0.7s linear infinite", display: "inline-block" }} />
+                    Отправляется...
+                  </span>
+                ) : "Отправить заявку →"}
               </GradBtn>
+              <style dangerouslySetInnerHTML={{ __html: "@keyframes spin{to{transform:rotate(360deg)}}" }} />
 
               <button onClick={onClose}
                 style={{ background: "none", border: "none", color: "#44445a", fontSize: 13, cursor: "pointer", padding: "4px", display: "flex", alignItems: "center", gap: 6, justifyContent: "center" }}>

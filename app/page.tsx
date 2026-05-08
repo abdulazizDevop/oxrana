@@ -290,13 +290,8 @@ export default function Home() {
   };
 
   const checkPasswordStrength = (pass: string) => {
-    let msg = "";
-    if (pass.length < 8) msg = "Слишком короткий";
-    else if (!/(?=.*[A-ZА-Я])/.test(pass)) msg = "Нужна заглавная буква";
-    else if (!/(?=.*[a-zа-я])/.test(pass)) msg = "Нужна строчная буква";
-    else if (!/(?=.*[^a-zA-Z0-9А-Яа-я])/.test(pass)) msg = "Нужен спецсимвол (!@#$ и т.д.)";
-    else if ((pass.match(/\d/g) || []).length < 5) msg = "Нужно минимум 5 цифр";
-    return msg;
+    if (pass.length < 6) return "Пароль должен быть не менее 6 символов";
+    return "";
   };
 
   const handleRegister = async () => {
@@ -640,7 +635,7 @@ export default function Home() {
                       <label style={labelStyle}>Пароль</label>
                       <input type="password" value={regPass} onChange={e => { setRegPass(e.target.value); setRegError(""); }} placeholder="••••••••" style={{...iInput(!!regError), padding: "12px 16px"}} />
                       <div style={{ fontSize: 10, color: "#55556a", marginTop: 4, lineHeight: 1.4 }}>
-                        Сложность: минимум 1 заглавная, 1 строчная, 1 спецсимвол и 5 цифр.
+                        Минимум 6 символов.
                       </div>
                     </div>
                     <div>
