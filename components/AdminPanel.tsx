@@ -952,7 +952,19 @@ export default function AdminPanel({ onExit }: Props) {
                         {filteredUsers.map((u, i) => (
                           <motion.div key={u.id}
                             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-                            onClick={() => setSelectedUser(selectedUser?.id === u.id ? null : u)}
+                            onClick={() => {
+                              const next = selectedUser?.id === u.id ? null : u;
+                              console.log(`[admin/users] row click u=${u.id} (${u.login}) → ${next ? 'select' : 'deselect'}`);
+                              setSelectedUser(next);
+                              // On mobile the detail panel renders below the list — auto-scroll to it
+                              // so the user actually sees what happened (otherwise the ✕ icon looks dead).
+                              if (next && isMobile) {
+                                setTimeout(() => {
+                                  const panel = document.getElementById('admin-user-card');
+                                  if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }, 80);
+                              }
+                            }}
                             onDoubleClick={() => handleDoubleClick(u)}
                             whileHover={{ x: 2 }}
                             style={{
@@ -977,7 +989,10 @@ export default function AdminPanel({ onExit }: Props) {
                                 {u.allowedSections.length === 0 && <span style={{ fontSize: 9, color: "#e63946" }}>Нет доступа</span>}
                               </div>
                             </div>
-                            <span style={{ fontSize: 16, color: selectedUser?.id === u.id ? "#4f8ef7" : "#33333d", flexShrink: 0 }}>{selectedUser?.id === u.id ? "✕" : "›"}</span>
+                            <span title={selectedUser?.id === u.id ? "Закрыть" : "Открыть"}
+                              style={{ fontSize: 16, color: selectedUser?.id === u.id ? "#4f8ef7" : "#33333d", flexShrink: 0 }}>
+                              {selectedUser?.id === u.id ? "✕" : "›"}
+                            </span>
                           </motion.div>
                         ))}
                       </div>
@@ -987,8 +1002,8 @@ export default function AdminPanel({ onExit }: Props) {
                     {/* Карточка сотрудника */}
                     <AnimatePresence>
                       {selectedUser && (
-                        <motion.div key={selectedUser.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.25 }}
-                          style={{ background: "rgba(19,19,26,0.95)", border: "1px solid rgba(79,142,247,0.2)", borderRadius: 22, padding: "0", alignSelf: "start", overflow: "hidden", maxHeight: isMobile ? "unset" : "calc(100vh - 120px)", overflowY: "auto" }}>
+                        <motion.div id="admin-user-card" key={selectedUser.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.25 }}
+                          style={{ background: "rgba(19,19,26,0.95)", border: "1px solid rgba(79,142,247,0.2)", borderRadius: 22, padding: "0", alignSelf: "start", overflow: "hidden", maxHeight: isMobile ? "unset" : "calc(100vh - 120px)", overflowY: "auto", scrollMarginTop: 80 }}>
 
                           {/* Шапка карточки */}
                           <div style={{ background: "linear-gradient(135deg, rgba(79,142,247,0.08), rgba(37,99,235,0.04))", borderBottom: "1px solid rgba(79,142,247,0.12)", padding: "22px 22px 18px" }}>

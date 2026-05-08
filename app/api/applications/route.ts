@@ -17,14 +17,21 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = clientKey(req);
   try {
     // Public endpoint — anyone can submit an application. Rate-limit per IP so a single
     // spammer can't drown the admin in fake requests.
     if (!rateLimit(clientKey(req, 'app-post'), 10, 60_000)) {
+      console.warn(`[applications] 429 rate-limited ip=${ip}`);
       return NextResponse.json({ error: 'Слишком много заявок, подождите минуту' }, { status: 429 });
     }
-    const { name, phone, object_name, address, userId, type, companyId } = await req.json();
-    if (!name || !phone || !object_name) return NextResponse.json({ error: 'name, phone, object_name required' }, { status: 400 });
+    const body = await req.json();
+    const { name, phone, object_name, address, userId, type, companyId } = body;
+    console.log(`[applications] POST from ip=${ip} type=${type} userId=${userId} name=${name} phone=${phone} object=${object_name}`);
+    if (!name || !phone || !object_name) {
+      console.warn(`[applications] 400 missing fields:`, { name: !!name, phone: !!phone, object_name: !!object_name });
+      return NextResponse.json({ error: 'name, phone, object_name required' }, { status: 400 });
+    }
     const res = await query(
       'INSERT INTO connection_applications (name, phone, object_name, address, user_id, type, company_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
       [name, phone, object_name, address || '', userId || null, type || 'connect', companyId || null]
@@ -41,10 +48,14 @@ export async function POST(req: NextRequest) {
     };
     const pushTitle = titleByType[reqType] || '📝 Новая заявка';
     const pushBody = `${name} · ${phone}${object_name ? ' · ' + object_name : ''}`;
-    sendPush({ title: pushTitle, body: pushBody, urgent: true, adminOnly: true }).catch(() => {});
+    sendPush({ title: pushTitle, body: pushBody, urgent: true, adminOnly: true })
+      .then(r => console.log(`[applications] push sent ok=${r.ok} sent=${r.sent} failed=${r.failed}`))
+      .catch(e => console.warn(`[applications] push error:`, e));
 
+    console.log(`[applications] 200 OK id=${res.rows[0]?.id}`);
     return NextResponse.json(res.rows[0]);
   } catch (e: any) {
+    console.error(`[applications] 500 error:`, e?.message, e);
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }
