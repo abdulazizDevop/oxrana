@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import { sendPush } from '@/lib/push';
+import { rateLimit, clientKey } from '@/lib/rate-limit';
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,6 +18,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    // Public endpoint — anyone can submit an application. Rate-limit per IP so a single
+    // spammer can't drown the admin in fake requests.
+    if (!rateLimit(clientKey(req, 'app-post'), 10, 60_000)) {
+      return NextResponse.json({ error: 'Слишком много заявок, подождите минуту' }, { status: 429 });
+    }
     const { name, phone, object_name, address, userId, type, companyId } = await req.json();
     if (!name || !phone || !object_name) return NextResponse.json({ error: 'name, phone, object_name required' }, { status: 400 });
     const res = await query(

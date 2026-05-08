@@ -14,8 +14,22 @@ export async function POST(req: NextRequest) {
   try {
     const { login, email, name, phone, password } = await req.json();
 
-    if (!login || login.length < 3) {
+    if (!login || typeof login !== "string" || login.length < 3) {
       return NextResponse.json({ error: 'Логин должен содержать минимум 3 символа' }, { status: 400 });
+    }
+    // Allow only ascii letters, digits, underscore and dash. Defends against URL-injection and
+    // accidental whitespace in stored logins (rendered everywhere, used in URLs, used in queries).
+    if (!/^[a-zA-Z0-9_-]+$/.test(login)) {
+      return NextResponse.json({ error: 'Логин может содержать только буквы (a-z), цифры, _ и -' }, { status: 400 });
+    }
+    if (!password || typeof password !== "string" || password.length < 6) {
+      return NextResponse.json({ error: 'Пароль должен быть не менее 6 символов' }, { status: 400 });
+    }
+    if (!email || typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: 'Введите корректный email' }, { status: 400 });
+    }
+    if (!name || typeof name !== "string" || name.trim().length < 2) {
+      return NextResponse.json({ error: 'Введите имя (минимум 2 символа)' }, { status: 400 });
     }
 
     const checkRes = await query('SELECT id FROM app_users WHERE login = $1', [login]);

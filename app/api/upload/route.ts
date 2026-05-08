@@ -3,6 +3,7 @@ import { query } from '@/lib/db';
 import { uploadToS3 } from '@/lib/s3';
 import { v4 as uuidv4 } from 'uuid';
 import { requireAuth } from '@/lib/auth';
+import { rateLimit, clientKey } from '@/lib/rate-limit';
 
 const ALLOWED_TYPES = new Set([
   'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
@@ -21,6 +22,10 @@ export async function POST(req: NextRequest) {
   try {
     const auth = await requireAuth(req);
     if (auth instanceof NextResponse) return auth;
+    // Cap uploads per user — protects S3 bill from a runaway script.
+    if (!rateLimit(clientKey(req, `upload:${auth.payload.id || 'anon'}`), 30, 60_000)) {
+      return NextResponse.json({ error: 'Слишком много загрузок, подождите минуту' }, { status: 429 });
+    }
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const recordId = formData.get('recordId') as string;
