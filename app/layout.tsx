@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ResetButton } from "@/components/ResetButton";
 
 export const metadata: Metadata = {
   title: "Глаза ЧОПа",
@@ -40,6 +41,7 @@ export default function RootLayout({
       </head>
       <body>
         {children}
+        <ResetButton />
         <script dangerouslySetInnerHTML={{
           __html: `
             if ('serviceWorker' in navigator) {

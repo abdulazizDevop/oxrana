@@ -63,60 +63,6 @@ function getSectionMap(city: string, companyId?: string, currentUser?: AppUser):
   };
 }
 
-// Full app reset: drops every client-side artefact (SW, caches, localStorage,
-// sessionStorage, cookies, IndexedDB) so the next load is identical to a brand-new install.
-async function hardResetApp() {
-  if (typeof window === "undefined") return;
-  if (!confirm("Полностью сбросить приложение? Будут удалены кеш, cookies и локальные данные. Вы выйдете из аккаунта.")) return;
-  try {
-    // 1. Server-side: clear auth cookie
-    try { await fetch("/api/auth", { method: "DELETE" }); } catch {}
-
-    // 2. Service workers
-    if ("serviceWorker" in navigator) {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(r => r.unregister()));
-    }
-
-    // 3. CacheStorage (all SW caches and any other named caches)
-    if ("caches" in window) {
-      const keys = await caches.keys();
-      await Promise.all(keys.map(k => caches.delete(k)));
-    }
-
-    // 4. localStorage + sessionStorage
-    try { localStorage.clear(); } catch {}
-    try { sessionStorage.clear(); } catch {}
-
-    // 5. Cookies — overwrite each one with an expired date for current path/domain
-    try {
-      document.cookie.split(";").forEach(c => {
-        const eq = c.indexOf("=");
-        const name = (eq > -1 ? c.substr(0, eq) : c).trim();
-        if (!name) return;
-        const expire = "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-        document.cookie = name + expire;
-        document.cookie = name + expire + "; domain=" + window.location.hostname;
-      });
-    } catch {}
-
-    // 6. IndexedDB — drop every database we can enumerate
-    try {
-      const anyIdb = (indexedDB as any);
-      if (anyIdb?.databases) {
-        const dbs: { name?: string }[] = await anyIdb.databases();
-        await Promise.all(dbs.map(db => db.name ? new Promise<void>(resolve => {
-          const req = indexedDB.deleteDatabase(db.name!);
-          req.onsuccess = req.onerror = req.onblocked = () => resolve();
-        }) : Promise.resolve()));
-      }
-    } catch {}
-  } catch {}
-
-  // Cache-bust the next request and force a full reload from the server
-  window.location.href = window.location.pathname + "?v=" + Date.now();
-}
-
 type EmergencyAlert = { id: string; triggered_by: string; triggered_by_role: string; message: string; created_at: string; };
 
 export default function Dashboard({ city, cityLabel, company, currentUser, onCityChange, onLogout }: {
@@ -1042,12 +988,6 @@ function MobileHomeGrid({ setActive, menu, currentUser, onLogout, onRequest }: {
             <p style={{ color: "#404058", fontSize: 12, marginTop: 4 }}>Система мониторинга объектов</p>
           </div>
           <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
-            <motion.button whileTap={{ scale: 0.88 }} onClick={hardResetApp}
-              aria-label="Сбросить приложение"
-              title="Полный сброс: кеш, cookies, локальные данные"
-              style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 14, width: 38, height: 38, color: "#f87171", fontSize: 16, cursor: "pointer", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              ↻
-            </motion.button>
             <motion.button whileTap={{ scale: 0.92 }} onClick={() => onRequest("connect")}
               style={{ background: "rgba(52,211,153,0.1)", border: "1px solid rgba(52,211,153,0.2)", borderRadius: 14, padding: "10px 14px", color: "#34d399", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
               Заявка
