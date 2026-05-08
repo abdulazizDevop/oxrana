@@ -2,19 +2,33 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
-if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-  console.error('CRITICAL: JWT_SECRET environment variable is not set in production');
+// Refuse to run in production without an explicit secret — see lib/jwt.ts for full rationale.
+if (
+  process.env.NODE_ENV === 'production' &&
+  !process.env.JWT_SECRET &&
+  process.env.NEXT_PHASE !== 'phase-production-build'
+) {
+  throw new Error('CRITICAL: JWT_SECRET environment variable is not set in production');
 }
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'fallback_secret_for_development_only'
 );
 
-const publicPaths = [
-  '/api/auth',
-  '/api/auth/register',
-  '/api/applications', // POST only - registration form (checked in route)
+// Endpoints reachable WITHOUT a session cookie. The route handlers themselves still
+// validate inputs (auth/login, /auth/admin code, registration). For /api/applications
+// only POST is anonymous (the connection-request form); GET/PATCH/DELETE go through
+// the regular auth checks in the route, but we also enforce that here for defence in depth.
+const fullyPublicPaths = [
+  '/api/auth',                // POST=login, GET=session check
+  '/api/auth/admin',          // POST=admin code
+  '/api/auth/register',       // POST=register
 ];
+function isPublicRequest(pathname: string, method: string): boolean {
+  if (fullyPublicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))) return true;
+  if (pathname === '/api/applications' && method === 'POST') return true;
+  return false;
+}
 
 function applySecurityHeaders(response: NextResponse, cspHeader: string) {
   if (cspHeader) {
@@ -60,7 +74,7 @@ export async function proxy(request: NextRequest) {
 
   // Only protect /api routes
   if (pathname.startsWith('/api')) {
-    if (publicPaths.some(p => pathname.startsWith(p))) {
+    if (isPublicRequest(pathname, request.method)) {
       return applySecurityHeaders(NextResponse.next(), cspHeader);
     }
 
