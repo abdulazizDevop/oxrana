@@ -377,13 +377,74 @@ export async function initDb() {
       ALTER TABLE companies ADD COLUMN IF NOT EXISTS owner_id TEXT;
       ALTER TABLE companies ADD COLUMN IF NOT EXISTS subscription_ends_at TIMESTAMPTZ;
       ALTER TABLE companies ADD COLUMN IF NOT EXISTS used_storage_bytes BIGINT DEFAULT 0;
-      
+
       ALTER TABLE connection_applications ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'connect';
       ALTER TABLE connection_applications ADD COLUMN IF NOT EXISTS user_id TEXT;
       ALTER TABLE connection_applications ADD COLUMN IF NOT EXISTS company_id TEXT;
-      
+
       ALTER TABLE app_users ADD COLUMN IF NOT EXISTS email TEXT;
       ALTER TABLE app_users ADD COLUMN IF NOT EXISTS phone TEXT;
+
+      -- ─── Indexes for hot lookup paths ─────────────────────────────────────────
+      -- Each one below targets a query pattern that the API runs frequently.
+      -- IF NOT EXISTS lets initDb() be safely re-run on every cold start.
+
+      -- Registration/login lookup by email
+      CREATE INDEX IF NOT EXISTS idx_app_users_email ON app_users (email);
+
+      -- handleSelectCity → /api/companies?cityId=…
+      CREATE INDEX IF NOT EXISTS idx_companies_city_id ON companies (city_id);
+      -- /api/users hasPermissionForEntities owner check + general ownership lookups
+      CREATE INDEX IF NOT EXISTS idx_companies_owner_id ON companies (owner_id);
+
+      -- Admin sees newest applications first; pending vs done
+      CREATE INDEX IF NOT EXISTS idx_apps_status_created ON connection_applications (status, created_at DESC);
+
+      -- The hottest section_records query: WHERE city_id=… AND company_id=… AND section=…
+      CREATE INDEX IF NOT EXISTS idx_section_records_filter
+        ON section_records (city_id, company_id, section, created_at DESC);
+      -- LEFT JOIN record_files ON file.record_id = section_records.id
+      CREATE INDEX IF NOT EXISTS idx_record_files_record_id ON record_files (record_id);
+
+      -- Polled by Dashboard every 30s — emergency_alerts WHERE resolved_at IS NULL AND city/company
+      CREATE INDEX IF NOT EXISTS idx_emergency_unresolved
+        ON emergency_alerts (city_id, company_id) WHERE resolved_at IS NULL;
+
+      -- Polled by ConferenceSection every 30s, by Dashboard every 60s
+      CREATE INDEX IF NOT EXISTS idx_conferences_city_company ON conferences (city_id, company_id);
+      CREATE INDEX IF NOT EXISTS idx_conf_invites_city_company ON conference_invitations (city_id, company_id);
+
+      -- AdminPanel cameras filter
+      CREATE INDEX IF NOT EXISTS idx_cameras_city_company ON cameras (city_id, company_id);
+
+      -- Admin log scrollback
+      CREATE INDEX IF NOT EXISTS idx_admin_log_filter
+        ON admin_log (city_id, company_id, logged_at DESC);
+
+      -- Admin expenses page
+      CREATE INDEX IF NOT EXISTS idx_admin_expenses_filter
+        ON admin_expenses (city_id, company_id, created_at DESC);
+
+      -- Transport log scrollback
+      CREATE INDEX IF NOT EXISTS idx_transport_log_filter
+        ON transport_log (city_id, company_id, logged_at DESC);
+
+      -- Transport vehicles by list type (allowed/working) within company
+      CREATE INDEX IF NOT EXISTS idx_transport_vehicles_lookup
+        ON transport_vehicles (city_id, company_id, list_type);
+
+      -- Push send adminOnly filter
+      CREATE INDEX IF NOT EXISTS idx_push_subs_admin ON push_subscriptions (is_admin) WHERE is_admin = true;
+
+      -- Schedules by company (EmployeesSection /api/records?section=schedule lookup)
+      CREATE INDEX IF NOT EXISTS idx_work_schedules_filter ON work_schedules (city_id, company_id);
+
+      -- user_logins reverse lookup by login (login flow alternate creds)
+      CREATE INDEX IF NOT EXISTS idx_user_logins_login ON user_logins (login);
+      CREATE INDEX IF NOT EXISTS idx_user_logins_user ON user_logins (user_id);
+
+      -- Face-check log lookup by user
+      CREATE INDEX IF NOT EXISTS idx_face_check_user ON face_check_logs (user_id, created_at DESC);
     `);
   } finally {
     client.release();
