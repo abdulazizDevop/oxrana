@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { requireAuth } from '@/lib/auth';
 
 
 // GET /api/conferences/invite?cityId=&companyId=&userId=
 // Возвращает активные приглашения, которые пользователь ещё не видел
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { searchParams } = new URL(req.url);
   const cityId = searchParams.get("cityId");
   const companyId = searchParams.get("companyId");
@@ -35,6 +38,8 @@ export async function GET(req: NextRequest) {
 // PATCH /api/conferences/invite - отметить как просмотренное
 export async function PATCH(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const body = await req.json();
     const { conferenceId, userId } = body;
 

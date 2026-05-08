@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { requireAuth } from '@/lib/auth';
 
 async function initTable() {
   await query(`
@@ -24,6 +25,8 @@ async function initTable() {
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     await initTable();
     const { searchParams } = new URL(req.url);
     const cityId = searchParams.get("cityId") || "";
@@ -49,6 +52,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     await initTable();
     const body = await req.json();
     const {
@@ -79,6 +84,8 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     await initTable();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { requireAuth } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   try {
     const { rows } = await query("SELECT * FROM role_instructions ORDER BY role_label");
     return NextResponse.json(rows);
@@ -11,6 +14,8 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const body = await req.json();
   const { roleKey, roleLabel, content, updatedBy } = body;
   try {

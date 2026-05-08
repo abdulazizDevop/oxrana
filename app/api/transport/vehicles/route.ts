@@ -4,8 +4,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { searchParams } = new URL(req.url);
   const cityId = searchParams.get('cityId');
   const companyId = searchParams.get('companyId');
@@ -45,6 +48,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { cityId, companyId, listType, plateNumber, driverName, description, createdBy } = await req.json();
   if (!plateNumber || !listType) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
 
@@ -57,6 +62,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   await query('DELETE FROM transport_vehicles WHERE id = $1', [id]);

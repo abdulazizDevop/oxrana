@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const { searchParams } = new URL(req.url);
     const cityId = searchParams.get('cityId');
     const companyId = searchParams.get('companyId');
@@ -20,6 +23,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const { cityId, companyId, name, url, type } = await req.json();
     if (!name || !url) return NextResponse.json({ error: 'name and url required' }, { status: 400 });
     const res = await query(
@@ -34,6 +39,8 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const id = req.nextUrl.searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     await query('DELETE FROM cameras WHERE id = $1', [id]);

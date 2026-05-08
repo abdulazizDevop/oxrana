@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
-
+import { requireAuth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const body = await req.json();
   const { userId, userName, isAdmin, subscription } = body;
   if (!subscription?.endpoint) return NextResponse.json({ error: "no subscription" }, { status: 400 });

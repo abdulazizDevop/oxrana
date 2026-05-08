@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const cityId = req.nextUrl.searchParams.get('cityId');
     const companyId = req.nextUrl.searchParams.get('companyId');
 
@@ -26,6 +29,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const { cityId, companyId, requesterName, itemName, quantity, notes } = await req.json();
     if (!itemName) return NextResponse.json({ error: 'itemName required' }, { status: 400 });
     const res = await query(
@@ -40,6 +45,8 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const { id, status } = await req.json();
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     const res = await query(
@@ -54,6 +61,8 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const id = req.nextUrl.searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     await query('DELETE FROM tmc_requests WHERE id = $1', [id]);

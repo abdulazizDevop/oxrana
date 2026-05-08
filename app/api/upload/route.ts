@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { uploadToS3 } from '@/lib/s3';
 import { v4 as uuidv4 } from 'uuid';
+import { requireAuth } from '@/lib/auth';
 
 const ALLOWED_TYPES = new Set([
   'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
@@ -18,6 +19,8 @@ const MAX_SIZE = 50 * 1024 * 1024; // 50MB
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const recordId = formData.get('recordId') as string;

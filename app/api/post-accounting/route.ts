@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, initDb } from "@/lib/db";
+import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     await initDb();
     const city = req.nextUrl.searchParams.get("city") || "";
     const companyId = req.nextUrl.searchParams.get("companyId") || "";
@@ -26,6 +29,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     await initDb();
     const body = await req.json();
     const res = await query(
@@ -50,6 +55,8 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     await initDb();
     const body = await req.json();
     const res = await query(
@@ -64,6 +71,8 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     await initDb();
     const id = req.nextUrl.searchParams.get("id");
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });

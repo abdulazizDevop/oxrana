@@ -3,8 +3,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { searchParams } = new URL(req.url);
   const cityId = searchParams.get('cityId');
   const companyId = searchParams.get('companyId');
@@ -28,6 +31,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const { cityId, companyId, vehicleId, plateNumber, driverName, listType, action, loggedBy, loggedByRole, note } = await req.json();
     if (!plateNumber || !action || !listType) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
 

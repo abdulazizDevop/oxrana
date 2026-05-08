@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { requireAuth } from '@/lib/auth';
 
 async function sendTelegramAlert(text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -15,6 +16,8 @@ async function sendTelegramAlert(text: string) {
 }
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { searchParams } = new URL(req.url);
   const cityId = searchParams.get('cityId');
   const companyId = searchParams.get('companyId');
@@ -30,6 +33,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { cityId, companyId, triggeredBy, triggeredByRole, message } = await req.json();
   const res = await query(
     `INSERT INTO emergency_alerts (city_id, company_id, triggered_by, triggered_by_role, message)
@@ -52,6 +57,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { id } = await req.json();
   await query(`UPDATE emergency_alerts SET resolved_at = NOW() WHERE id = $1`, [id]);
   return NextResponse.json({ ok: true });

@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { requireAuth } from '@/lib/auth';
 
 
 // GET /api/conferences?cityId=&companyId=&status=active
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { searchParams } = new URL(req.url);
   const cityId = searchParams.get("cityId");
   const companyId = searchParams.get("companyId");
@@ -29,6 +32,8 @@ export async function GET(req: NextRequest) {
 // POST /api/conferences - создать конференцию (admin only)
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const body = await req.json();
     const { title, cityId, companyId, createdBy, createdByName } = body;
 
@@ -64,6 +69,8 @@ export async function POST(req: NextRequest) {
 // PATCH /api/conferences - завершить конференцию
 export async function PATCH(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const body = await req.json();
     const { id, status } = body;
 

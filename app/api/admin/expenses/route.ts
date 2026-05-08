@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { requireAuth, requireAdmin } from "@/lib/auth";
 
 async function writeLog(cityId: string, companyId: string, actorName: string, actorRole: string, action: string, section: string, detail: string) {
   await query(
@@ -10,6 +11,11 @@ async function writeLog(cityId: string, companyId: string, actorName: string, ac
 }
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const adminCheck = requireAdmin(auth.payload);
+  if (adminCheck) return adminCheck;
+
   const cityId = req.nextUrl.searchParams.get("cityId") || "";
   const companyId = req.nextUrl.searchParams.get("companyId") || "";
   const conds: string[] = [];
@@ -22,6 +28,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const adminCheck = requireAdmin(auth.payload);
+  if (adminCheck) return adminCheck;
+
   const { cityId, companyId, expenseName, advanceAmount, totalAmount, comment, actorName, actorRole } = await req.json();
   if (!cityId || !companyId || !expenseName) {
     return NextResponse.json({ error: "Обязательные поля: cityId, companyId, expenseName" }, { status: 400 });
@@ -39,6 +50,11 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const adminCheck = requireAdmin(auth.payload);
+  if (adminCheck) return adminCheck;
+
   const id = req.nextUrl.searchParams.get("id");
   const actorName = req.nextUrl.searchParams.get("actorName") || "";
   const actorRole = req.nextUrl.searchParams.get("actorRole") || "";

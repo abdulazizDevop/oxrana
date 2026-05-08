@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql, initDb } from "@/lib/db";
+import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     await initDb();
     const city = req.nextUrl.searchParams.get("city");
     const rows = city
@@ -16,6 +19,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     await initDb();
     const body = await req.json();
     const rows = await sql`

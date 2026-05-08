@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { requireAuth } from '@/lib/auth';
 
 
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { searchParams } = new URL(req.url);
   const cityId = searchParams.get("cityId");
   const companyId = searchParams.get("companyId");
@@ -24,6 +27,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const body = await req.json();
   const { cityId, companyId, employeeName, role, scheduleType, workStart, workEnd, restStart, restEnd, shiftHours, restHours, note } = body;
   try {
@@ -42,6 +47,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "no id" }, { status: 400 });

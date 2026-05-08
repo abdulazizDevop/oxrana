@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { requireAuth, requireAdmin } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
+    const adminCheck = requireAdmin(auth.payload);
+    if (adminCheck) return adminCheck;
+
     const data = await req.json();
     const { applicationId, cityId, objectName, address, login, password, userId: existingUserId, type, companyId: existingCompanyId } = data;
 

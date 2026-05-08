@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { requireAuth } from '@/lib/auth';
 
 
 // GET /api/conferences/messages?conferenceId=
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
   const { searchParams } = new URL(req.url);
   const conferenceId = searchParams.get("conferenceId");
 
@@ -23,6 +26,8 @@ export async function GET(req: NextRequest) {
 // POST /api/conferences/messages
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const body = await req.json();
     const { conferenceId, userId, userName, userRole, message } = body;
 

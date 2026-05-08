@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { v4 as uuidv4 } from 'uuid';
+import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const { searchParams } = new URL(req.url);
     const cityId = searchParams.get('cityId');
     const companyId = searchParams.get('companyId');
@@ -36,6 +39,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const { cityId, companyId, section, data, createdBy } = await req.json();
     if (!section) return NextResponse.json({ error: 'section required' }, { status: 400 });
     const id = uuidv4();
@@ -51,6 +56,8 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const { id, data } = await req.json();
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     const res = await query(
@@ -65,6 +72,8 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    const auth = await requireAuth(req);
+    if (auth instanceof NextResponse) return auth;
     const id = req.nextUrl.searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
     await query('DELETE FROM section_records WHERE id = $1', [id]);

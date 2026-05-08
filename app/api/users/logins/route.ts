@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { requireAuth, requireAdmin } from '@/lib/auth';
 
-// GET /api/users/logins?userId=xxx — все логины сотрудника
+// GET /api/users/logins?userId=xxx — все логины сотрудника. Только админ (выдаёт доступы).
 export async function GET(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const adminCheck = requireAdmin(auth.payload);
+  if (adminCheck) return adminCheck;
+
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get('userId');
   if (!userId) return NextResponse.json([], { status: 200 });
@@ -14,13 +20,17 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(res.rows);
 }
 
-// POST /api/users/logins — создать новый логин
+// POST — создать новый логин. Только админ.
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const adminCheck = requireAdmin(auth.payload);
+  if (adminCheck) return adminCheck;
+
   const { userId, login, password, label } = await req.json();
   if (!userId || !login || !password) {
     return NextResponse.json({ error: 'Заполните все поля' }, { status: 400 });
   }
-  // Проверить уникальность логина
   const existing = await query(
     'SELECT id FROM user_logins WHERE login = $1 UNION ALL SELECT id FROM app_users WHERE login = $1',
     [login]
@@ -38,8 +48,13 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(res.rows[0]);
 }
 
-// DELETE /api/users/logins?id=xxx — удалить логин
+// DELETE — удалить логин. Только админ.
 export async function DELETE(req: NextRequest) {
+  const auth = await requireAuth(req);
+  if (auth instanceof NextResponse) return auth;
+  const adminCheck = requireAdmin(auth.payload);
+  if (adminCheck) return adminCheck;
+
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'No id' }, { status: 400 });
