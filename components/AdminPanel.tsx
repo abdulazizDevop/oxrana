@@ -129,6 +129,7 @@ export default function AdminPanel({ onExit }: Props) {
     allowedSections: [] as SectionId[], allowedCities: [] as string[], allowedCompanies: [] as string[],
   });
   const [formError, setFormError] = useState("");
+  const [savingUser, setSavingUser] = useState(false);
 
   // Password reveal on double-click
   const [credModal, setCredModal] = useState<{ name: string; login: string; password: string } | null>(null);
@@ -454,6 +455,8 @@ export default function AdminPanel({ onExit }: Props) {
     if (form.allowedSections.length === 0) { setFormError("Выберите хотя бы одну секцию"); return; }
     if (form.allowedCities.length === 0) { setFormError("Выберите хотя бы один город"); return; }
     if (form.allowedCompanies.length === 0) { setFormError("Выберите хотя бы одну компанию"); return; }
+    if (savingUser) return; // prevent double-submit
+    setSavingUser(true);
     try {
        const res = editUser
          ? await fetch("/api/users", {
@@ -473,7 +476,8 @@ export default function AdminPanel({ onExit }: Props) {
        if (!editUser) {
          setNewUserCard({ name: form.name, login: form.login, password: form.password, role: form.role, cities: form.allowedCities, companies: form.allowedCompanies });
        }
-     } catch (e: any) { setFormError(e?.message || "Ошибка сохранения"); }
+     } catch (e: any) { setFormError(e?.message || "Ошибка соединения"); }
+     finally { setSavingUser(false); }
   };
 
   const handleDelete = async (id: string) => {
@@ -492,7 +496,7 @@ export default function AdminPanel({ onExit }: Props) {
       if (!selectedCity) { setCoError("Выберите город"); return; }
       const id = name.toLowerCase().replace(/\s+/g, "_") + "_" + Date.now();
       const res = await fetch("/api/companies", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, cityId: selectedCity, name, description: newCoDesc.trim() }) });
-      if (!res.ok) { setCoError("Ошибка при добавлении"); return; }
+      if (!res.ok) { const d = await res.json().catch(() => ({})); setCoError(d.error || `Ошибка ${res.status} при добавлении`); return; }
       const newCo = await res.json();
       setCompanies(prev => [...prev, { id: newCo.id, cityId: newCo.cityId || newCo.city_id || selectedCity, name: newCo.name, description: newCo.description }]);
       setNewCoName(""); setNewCoDesc(""); setCoError("");
@@ -510,7 +514,7 @@ export default function AdminPanel({ onExit }: Props) {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: editingCompany.id, name: editCoForm.name.trim(), description: editCoForm.description.trim() }),
     });
-    if (!res.ok) { setEditCoError("Ошибка сохранения"); return; }
+    if (!res.ok) { const d = await res.json().catch(() => ({})); setEditCoError(d.error || `Ошибка ${res.status} при сохранении`); return; }
     refreshCompanies(); setEditingCompany(null); setEditCoError("");
     if (selectedCompany?.id === editingCompany.id) {
       setSelectedCompany(prev => prev ? { ...prev, name: editCoForm.name.trim() } : null);
@@ -2140,9 +2144,9 @@ export default function AdminPanel({ onExit }: Props) {
               )}
               <div style={{ display: "flex", gap: 10 }}>
                 <button onClick={() => setShowForm(false)} style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "13px", fontSize: 14, color: "#888", cursor: "pointer" }}>Отмена</button>
-                <motion.button onClick={handleSave} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                  style={{ flex: 2, background: "linear-gradient(135deg, #e63946, #c1121f)", border: "none", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 600, color: "white", cursor: "pointer", boxShadow: "0 4px 16px rgba(230,57,70,0.3)" }}>
-                  {editUser ? "Сохранить изменения" : "Создать сотрудника"}
+                <motion.button onClick={handleSave} disabled={savingUser} whileHover={savingUser ? {} : { scale: 1.02 }} whileTap={savingUser ? {} : { scale: 0.97 }}
+                  style={{ flex: 2, background: savingUser ? "rgba(120,120,140,0.4)" : "linear-gradient(135deg, #e63946, #c1121f)", border: "none", borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 600, color: "white", cursor: savingUser ? "not-allowed" : "pointer", boxShadow: savingUser ? "none" : "0 4px 16px rgba(230,57,70,0.3)" }}>
+                  {savingUser ? "Сохранение..." : (editUser ? "Сохранить изменения" : "Создать сотрудника")}
                 </motion.button>
               </div>
             </motion.div>

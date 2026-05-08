@@ -151,7 +151,7 @@ export default function ExpensesSection({ city, companyId, currentUser }: Props)
     if (!expForm.expenseName.trim()) { setExpFormError("Введите название расхода"); return; }
     setExpSaving(true);
     try {
-      await fetch("/api/admin/expenses", {
+      const res = await fetch("/api/admin/expenses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -163,8 +163,13 @@ export default function ExpensesSection({ city, companyId, currentUser }: Props)
           actorName: currentUser.name, actorRole: currentUser.role,
         }),
       });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setExpFormError(d.error || `Ошибка ${res.status} при сохранении`);
+        return;
+      }
       resetExpForm(); setShowExpForm(false); loadExpenses();
-    } catch { setExpFormError("Ошибка сохранения"); }
+    } catch (e: any) { setExpFormError(e?.message || "Ошибка соединения"); }
     finally { setExpSaving(false); }
   };
 
