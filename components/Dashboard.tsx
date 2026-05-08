@@ -162,7 +162,7 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
 
   useEffect(() => {
     checkConfInvites();
-    confPollRef.current = setInterval(checkConfInvites, 8000);
+    confPollRef.current = setInterval(checkConfInvites, 60_000);
     return () => { if (confPollRef.current) clearInterval(confPollRef.current); };
   }, [checkConfInvites]);
 
@@ -198,7 +198,7 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
 
   useEffect(() => {
     checkEmergency();
-    pollRef.current = setInterval(checkEmergency, 10000);
+    pollRef.current = setInterval(checkEmergency, 30_000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [checkEmergency]);
 
@@ -223,7 +223,42 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
     return currentUser.allowedSections.includes(m.id as any);
   });
 
-  const [active, setActive] = useState<string | null>(allowedMenu.length > 0 ? allowedMenu[0].id : null);
+  // Read initial section from URL hash so direct links (e.g. /#patrol) and browser back/forward work
+  const [active, _setActive] = useState<string | null>(() => {
+    if (typeof window === "undefined") return allowedMenu.length > 0 ? allowedMenu[0].id : null;
+    const hash = window.location.hash.replace(/^#/, "");
+    if (hash === "home") return null;
+    if (hash && allowedMenu.some(m => m.id === hash)) return hash;
+    return allowedMenu.length > 0 ? allowedMenu[0].id : null;
+  });
+
+  // Wrap setActive so navigating updates the URL hash. Browser back/forward then
+  // returns the user to the previous section (or to the home grid via #home).
+  const setActive = (id: string | null) => {
+    _setActive(id);
+    if (typeof window !== "undefined") {
+      const target = id ?? "home";
+      if (window.location.hash.replace(/^#/, "") !== target) {
+        window.history.pushState(null, "", "#" + target);
+      }
+    }
+  };
+
+  // React to browser back/forward by syncing state from the hash.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onHashChange = () => {
+      const hash = window.location.hash.replace(/^#/, "");
+      if (hash === "home") _setActive(null);
+      else if (hash && allowedMenu.some(m => m.id === hash)) _setActive(hash);
+    };
+    window.addEventListener("popstate", onHashChange);
+    window.addEventListener("hashchange", onHashChange);
+    return () => {
+      window.removeEventListener("popstate", onHashChange);
+      window.removeEventListener("hashchange", onHashChange);
+    };
+  }, [allowedMenu]);
 
   useEffect(() => {
     const check = () => {
@@ -850,17 +885,21 @@ function MobileLayout({
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {active && (
               <motion.button onClick={() => setActive(null)} whileTap={{ scale: 0.88 }}
-                style={{ width: 34, height: 34, borderRadius: 11, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)", color: "#606078", fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                aria-label="На главную"
+                style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(79,142,247,0.12)", border: "1px solid rgba(79,142,247,0.3)", color: "#4f8ef7", fontSize: 18, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 ←
               </motion.button>
             )}
-            <div style={{ width: 34, height: 34, borderRadius: 11, background: "linear-gradient(135deg, #e63946, #ff6b35)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <button onClick={() => setActive(null)}
+              aria-label="На главную"
+              style={{ width: 34, height: 34, borderRadius: 11, background: "linear-gradient(135deg, #e63946, #ff6b35)", display: "flex", alignItems: "center", justifyContent: "center", border: "none", padding: 0, cursor: "pointer" }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6v6c0 5.5 3.5 10.7 8 12 4.5-1.3 8-6.5 8-12V6L12 2z" fill="white"/></svg>
-            </div>
-            <div>
+            </button>
+            <button onClick={() => setActive(null)}
+              style={{ background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#f0f0fa" }}>{activeItem ? activeItem.fullLabel : "Глаза ЧОПа"}</div>
               <div style={{ fontSize: 9, color: "#404058", letterSpacing: "0.08em" }}>📍 {CITY_LABELS[city] ?? city}</div>
-            </div>
+            </button>
           </div>
           <div style={{ display: "flex", gap: 7, alignItems: "center" }}>
             {!currentUser.is_admin && (

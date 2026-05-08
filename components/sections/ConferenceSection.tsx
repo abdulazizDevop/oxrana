@@ -95,7 +95,7 @@ export default function ConferenceSection({ city, companyId, currentUser, isAdmi
 
   useEffect(() => {
     loadConferences();
-    const interval = setInterval(loadConferences, 10000);
+    const interval = setInterval(loadConferences, 30_000);
     return () => clearInterval(interval);
   }, [city, companyId]);
 
