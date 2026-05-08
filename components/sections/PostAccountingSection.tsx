@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash2, Save, X, Printer, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Trash2, Save, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 type DutyRecord = {
   id: string;

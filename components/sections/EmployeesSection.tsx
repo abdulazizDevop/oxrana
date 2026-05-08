@@ -16,7 +16,7 @@ const AVAILABLE_SECTIONS = [
   { id: "conference", label: "Конференция", icon: "🎥" },
 ];
 
-export default function EmployeesSection({ city, companyId, currentUser }: { city: string; companyId?: string; currentUser: AppUser; }) {
+export default function EmployeesSection({ city, companyId }: { city: string; companyId?: string }) {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

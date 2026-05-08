@@ -119,7 +119,6 @@ export default function AdminPanel({ onExit }: Props) {
 
   // Password reveal on double-click
   const [credModal, setCredModal] = useState<{ name: string; login: string; password: string } | null>(null);
-  const [credLoading, setCredLoading] = useState(false);
 
   // Карточка нового сотрудника (показывается после создания)
   const [newUserCard, setNewUserCard] = useState<{ name: string; login: string; password: string; role: string; cities: string[]; companies: string[] } | null>(null);
@@ -407,10 +406,8 @@ export default function AdminPanel({ onExit }: Props) {
 
   // Double-click to reveal credentials
   const handleDoubleClick = async (u: AppUser) => {
-    setCredLoading(true);
     const res = await fetch(`/api/users?withPassword=1&id=${u.id}`);
     const data = await res.json();
-    setCredLoading(false);
     setCredModal({
       name: data?.name || u.name,
       login: data?.login || u.login,
@@ -475,7 +472,6 @@ export default function AdminPanel({ onExit }: Props) {
   const toggleCity = (id: string) => setForm(f => ({ ...f, allowedCities: f.allowedCities.includes(id) ? f.allowedCities.filter(x => x !== id) : [...f.allowedCities, id] }));
   const toggleCompany = (id: string) => setForm(f => ({ ...f, allowedCompanies: f.allowedCompanies.includes(id) ? f.allowedCompanies.filter(x => x !== id) : [...f.allowedCompanies, id] }));
 
-  const cityCompanies = selectedCity ? companies.filter(c => c.cityId === selectedCity) : [];
     const handleAddCompany = async () => {
       const name = newCoName.trim();
       if (!name) { setCoError("Введите название"); return; }

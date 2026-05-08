@@ -56,7 +56,7 @@ function getSectionMap(city: string, companyId?: string, currentUser?: AppUser):
     fines:         <FinesSection city={city} companyId={companyId} />,
     expenses:      currentUser ? <ExpensesSection city={city} companyId={companyId} currentUser={currentUser} /> : null,
     work_schedule: <WorkScheduleSection city={city} companyId={companyId} />,
-      employees: <EmployeesSection city={city} companyId={companyId} currentUser={currentUser as AppUser} />,
+      employees: <EmployeesSection city={city} companyId={companyId} />,
       admin_log:     <AdminLogSection city={city} companyId={companyId} />,
       post_accounting: <PostAccountingSection city={city} companyId={companyId} />,
       conference:    <ConferenceSection city={city} companyId={companyId} currentUser={currentUser as AppUser} isAdmin={!!currentUser?.is_admin} />,
@@ -65,9 +65,9 @@ function getSectionMap(city: string, companyId?: string, currentUser?: AppUser):
 
 type EmergencyAlert = { id: string; triggered_by: string; triggered_by_role: string; message: string; created_at: string; };
 
-export default function Dashboard({ city, cityLabel, company, currentUser, onCityChange, onLogout }: {
+export default function Dashboard({ city, cityLabel, company, currentUser, onLogout }: {
   city: string; cityLabel?: string; company?: Company; currentUser: AppUser;
-  onCityChange: () => void; onLogout: () => void;
+  onLogout: () => void;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -289,7 +289,7 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
         )}
         <MobileLayout
           active={active} setActive={setActive} sectionMap={sectionMap} city={city}
-          onCityChange={onCityChange} menu={allowedMenu} currentUser={currentUser} onLogout={onLogout}
+          menu={allowedMenu} currentUser={currentUser} onLogout={onLogout}
           emergencyAlert={emergencyAlert} onEmergency={() => setEmConfirm(true)} onResolve={resolveEmergency}
           emConfirm={emConfirm} setEmConfirm={setEmConfirm} emSending={emSending} triggerEmergency={triggerEmergency}
           onRequest={(type: "connect" | "new_object" | "subscription" = "connect") => { setRequestType(type); setShowRequestModal(true); }}
@@ -857,13 +857,13 @@ export default function Dashboard({ city, cityLabel, company, currentUser, onCit
    MOBILE LAYOUT
 ═══════════════════════════════════════════════════════ */
 function MobileLayout({
-  active, setActive, sectionMap, city, onCityChange, menu, currentUser, onLogout,
+  active, setActive, sectionMap, city, menu, currentUser, onLogout,
   emergencyAlert, onEmergency, onResolve, emConfirm, setEmConfirm, emSending, triggerEmergency,
   onRequest,
 }: {
   active: string | null; setActive: (id: string | null) => void;
   sectionMap: Record<string, React.ReactNode>; city: string;
-  onCityChange: () => void; menu: typeof MENU; currentUser: AppUser; onLogout: () => void;
+  menu: typeof MENU; currentUser: AppUser; onLogout: () => void;
   emergencyAlert: EmergencyAlert | null; onEmergency: () => void; onResolve: () => void;
   emConfirm: boolean; setEmConfirm: (v: boolean) => void; emSending: boolean; triggerEmergency: () => void;
   onRequest: (type?: "connect" | "new_object" | "subscription") => void;

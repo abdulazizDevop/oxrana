@@ -28,7 +28,6 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
   const [form, setForm] = useState({ guard: "", area: "", notes: "", status: "pending" });
   const [employees, setEmployees] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<{ id: string; url: string; fileName: string; fileType: string; fileSize: number }[]>([]);
   const [pendingRecordId, setPendingRecordId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -71,7 +70,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
       body: JSON.stringify({ id: pendingRecordId, data: form }),
     });
     setForm({ guard: "", area: "", notes: "", status: "pending" });
-    setUploadedFiles([]);
+
     setPendingRecordId(null);
     setShowForm(false);
     setSaving(false);
@@ -83,7 +82,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
     setPendingRecordId(null);
     setShowForm(false);
     setForm({ guard: "", area: "", notes: "", status: "pending" });
-    setUploadedFiles([]);
+
   }
 
   async function remove(id: string) {
@@ -196,7 +195,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                   </select>
                 </div>
               </div>
-              <FileUpload recordId={pendingRecordId || undefined} companyId={companyId} files={[]} onUpload={f => setUploadedFiles(p => [...p, f])} />
+              <FileUpload recordId={pendingRecordId || undefined} companyId={companyId} files={[]} />
               <div className="flex gap-2 pt-4">
                 <motion.button
                   onClick={save} disabled={saving}

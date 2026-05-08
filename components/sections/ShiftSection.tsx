@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, RefreshCw, Loader2, Trash2, Search, User, ArrowRight, FileText, X } from "lucide-react";
+import { Plus, RefreshCw, Loader2, Trash2, User, ArrowRight, FileText, X } from "lucide-react";
 import FileUpload from "@/components/FileUpload";
 
 type ShiftRecord = { id: string; data: { outgoing: string; incoming: string; status: string; notes?: string; }; files?: { id: string; url: string; file_name: string; file_type: string; file_size: number }[]; created_at: string; };

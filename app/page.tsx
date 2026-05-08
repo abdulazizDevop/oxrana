@@ -410,10 +410,7 @@ export default function Home() {
   if (isAdmin) return <AdminPanel onExit={async () => { try { await fetch("/api/auth", { method: "DELETE" }); } catch {} setIsAdmin(false); setAdminCode(""); setMode("login"); }} />;
   if (company && city && currentUser) return (
     <Dashboard city={city.id} cityLabel={city.label} company={company} currentUser={currentUser}
-      onCityChange={() => {
-        if (currentUser) try { localStorage.removeItem(`oxr_company_${currentUser.id}`); } catch {}
-        setCompany(null); setStep("company");
-      }} onLogout={handleLogout} />
+      onLogout={handleLogout} />
   );
 
   return (
