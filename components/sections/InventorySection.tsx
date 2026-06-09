@@ -263,7 +263,7 @@ export default function InventorySection({
                     <X size={16} />
                   </button>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
                   <div className="space-y-1.5">
                     <label className="flex items-center gap-1.5 text-[10px] text-white/35 uppercase tracking-widest font-medium">
                       <Tag size={10} /> Наименование

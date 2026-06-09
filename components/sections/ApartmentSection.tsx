@@ -100,7 +100,7 @@ export default function ApartmentSection({ city, companyId }: { city: string; co
                   <X size={16} />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Помещение / Комната</label>
                   <input placeholder="Комната 101, Кухня..." value={form.room_name} onChange={e => setForm({ ...form, room_name: e.target.value })}

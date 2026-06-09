@@ -3,12 +3,15 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Camera, Loader2, Trash2, X } from "lucide-react";
 import FileUpload from "@/components/FileUpload";
+import type { AppUser } from "@/lib/auth";
 
-type Record = { id: string; data: { violation_type: string; description?: string; location?: string; }; files?: { id: string; url: string; file_name: string; file_type: string; file_size: number }[]; created_at: string; };
+type Record = { id: string; data: { violation_type: string; description?: string; location?: string; createdBy?: string; createdByName?: string; }; files?: { id: string; url: string; file_name: string; file_type: string; file_size: number }[]; created_at: string; };
 
 const VIOLATION_TYPES = ["Парковка", "Вандализм", "Нарушение порядка", "Посторонние лица", "Пожарная безопасность", "Другое"];
 
-export default function PhotoReportSection({ city, companyId }: { city: string; companyId?: string }) {
+export default function PhotoReportSection({ city, companyId, currentUser }: { city: string; companyId?: string; currentUser?: AppUser }) {
+  // Office (company_manager) + admin can see everyone's reports. Workers see only their own.
+  const isOffice = !!(currentUser?.is_admin || currentUser?.role === "company_manager");
   const [records, setRecords] = useState<Record[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -34,10 +37,20 @@ export default function PhotoReportSection({ city, companyId }: { city: string; 
 
   async function save() {
     setSaving(true);
-    await fetch("/api/records", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: pendingId, data: form }) });
+    const dataWithAuthor = {
+      ...form,
+      createdBy: currentUser?.id,
+      createdByName: currentUser?.name,
+    };
+    await fetch("/api/records", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: pendingId, data: dataWithAuthor }) });
     setForm({ violation_type: VIOLATION_TYPES[0], description: "", location: "" });
     setPendingId(null); setShowForm(false); setSaving(false); fetchAll();
   }
+
+  // Workers see only what they submitted themselves; office sees everything.
+  const visibleRecords = isOffice
+    ? records
+    : records.filter(r => r.data.createdBy === currentUser?.id);
 
   async function cancelForm() {
     if (pendingId) await fetch(`/api/records?id=${pendingId}`, { method: "DELETE" });
@@ -77,7 +90,7 @@ export default function PhotoReportSection({ city, companyId }: { city: string; 
                   <X size={16} />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Тип нарушения</label>
                   <select value={form.violation_type} onChange={e => setForm({ ...form, violation_type: e.target.value })}
@@ -111,8 +124,8 @@ export default function PhotoReportSection({ city, companyId }: { city: string; 
       </AnimatePresence>
 
       {loading ? <div className="flex justify-center py-12"><Loader2 className="animate-spin text-white/20" size={28} /></div>
-        : records.length === 0 ? <div className="text-center py-14 text-white/20 flex flex-col items-center gap-3"><Camera size={36} className="opacity-30" /><span className="text-sm">Нарушений нет</span></div>
-          : <div className="flex flex-col gap-4">{records.map((r, i) => (
+        : visibleRecords.length === 0 ? <div className="text-center py-14 text-white/20 flex flex-col items-center gap-3"><Camera size={36} className="opacity-30" /><span className="text-sm">Нарушений нет</span></div>
+          : <div className="flex flex-col gap-4">{visibleRecords.map((r, i) => (
             <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: i * 0.04 }}
               className="bg-white/3.5 border border-white/8 hover:border-white/15 rounded-2xl p-3.5 sm:p-4 group transition-all"
               style={{ boxShadow: "0 1px 0 rgba(255,255,255,0.04)" }}>
@@ -121,10 +134,19 @@ export default function PhotoReportSection({ city, companyId }: { city: string; 
                   <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0"><Camera size={16} className="text-orange-400" /></div>
                   <div className="min-w-0">
                     <p className="text-white text-sm font-medium truncate">{r.data.violation_type}</p>
-                    <p className="text-white/30 text-xs truncate">{r.data.location}{r.data.description ? ` · ${r.data.description}` : ""}</p>
+                    <p className="text-white/40 text-xs truncate">{r.data.location || ""}</p>
+                    {r.data.description && (
+                      <p className="text-white/55 text-xs mt-1 whitespace-pre-wrap break-words">{r.data.description}</p>
+                    )}
+                    {/* Office sees who submitted — useful for triage. */}
+                    {isOffice && r.data.createdByName && (
+                      <p className="text-white/30 text-[10px] mt-1">от: {r.data.createdByName}</p>
+                    )}
                   </div>
                 </div>
-                <button onClick={() => remove(r.id)} className="opacity-40 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all ml-2"><Trash2 size={14} /></button>
+                {(isOffice || r.data.createdBy === currentUser?.id) && (
+                  <button onClick={() => remove(r.id)} className="opacity-40 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all ml-2"><Trash2 size={14} /></button>
+                )}
               </div>
               {r.files && r.files.length > 0 && (
                 <div className="flex gap-2 mt-3 flex-wrap">

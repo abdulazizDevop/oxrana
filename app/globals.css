@@ -367,8 +367,13 @@ button:not(:disabled):active {
     padding-bottom: 24px !important;
   }
 
-  /* Один столбец в формах */
-  .grid-cols-2, .grid-cols-3 {
+  /* Один столбец в формах. Tailwind's sm:grid-cols-2 kicked in at 640px which a phone
+     in landscape (or iPad portrait at 768px) would reach — inside a narrow modal that means
+     two ~150px columns where labels with tracking-widest overflow and visually overlap
+     with their inputs. Force a single column for every responsive 2-col grid up to md. */
+  .grid-cols-2, .grid-cols-3,
+  .sm\:grid-cols-2, .sm\:grid-cols-3,
+  [class*="grid-cols-2"]:not([class*="lg\\:grid-cols-2"]) {
     grid-template-columns: 1fr !important;
   }
 

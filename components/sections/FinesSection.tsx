@@ -3,14 +3,19 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, AlertTriangle, Loader2, Trash2, X } from "lucide-react";
 import FileUpload from "@/components/FileUpload";
+import type { AppUser } from "@/lib/auth";
 
 type Record = { id: string; data: { guard: string; violation: string; amount: number; status: string; notes?: string; }; files?: { id: string; url: string; file_name: string; file_type: string; file_size: number }[]; created_at: string; };
 
-const statusColor = (s: string) => s === "paid" ? "text-emerald-400" : s === "disputed" ? "text-amber-400" : "text-red-400";
-const statusLabel = (s: string) => s === "paid" ? "Оплачен" : s === "disputed" ? "Оспаривается" : "Ожидает";
-const statusBg = (s: string) => s === "paid" ? "bg-emerald-500/10" : s === "disputed" ? "bg-amber-500/10" : "bg-red-500/10";
+// Binary "paid/not paid" status — the client asked for the older "Оспаривается" option to go.
+const statusColor = (s: string) => s === "paid" ? "text-emerald-400" : "text-red-400";
+const statusLabel = (s: string) => s === "paid" ? "Оплатил" : "Не оплатил";
+const statusBg = (s: string) => s === "paid" ? "bg-emerald-500/10" : "bg-red-500/10";
 
-export default function FinesSection({ city, companyId }: { city: string; companyId?: string }) {
+export default function FinesSection({ city, companyId, currentUser }: { city: string; companyId?: string; currentUser?: AppUser }) {
+  // Office (company_manager) and admin can create/edit fines.
+  // Workers can only view fines addressed to them — they cannot fine themselves or anyone else.
+  const isOffice = !!(currentUser?.is_admin || currentUser?.role === "company_manager");
   const [records, setRecords] = useState<Record[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -57,12 +62,17 @@ export default function FinesSection({ city, companyId }: { city: string; compan
 
   async function remove(id: string) { await fetch(`/api/records?id=${id}`, { method: "DELETE" }); fetchAll(); }
 
-  const filteredRecords = records.filter(r => {
+  // Workers only see fines where the guard name matches them — they can't see other people's fines.
+  const visibleRecords = isOffice
+    ? records
+    : records.filter(r => (r.data.guard || "").trim().toLowerCase() === (currentUser?.name || "").trim().toLowerCase());
+
+  const filteredRecords = visibleRecords.filter(r => {
     if (!searchQuery) return true;
     const s = searchQuery.toLowerCase();
-    return r.data.guard?.toLowerCase().includes(s) || 
-           r.data.violation?.toLowerCase().includes(s) || 
-           r.data.notes?.toLowerCase().includes(s) || 
+    return r.data.guard?.toLowerCase().includes(s) ||
+           r.data.violation?.toLowerCase().includes(s) ||
+           r.data.notes?.toLowerCase().includes(s) ||
            statusLabel(r.data.status).toLowerCase().includes(s);
   });
 
@@ -85,11 +95,13 @@ export default function FinesSection({ city, companyId }: { city: string; compan
               onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)"}
             />
         </div>
-        <motion.button onClick={openForm} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 500, damping: 20 }}
-          className="flex items-center gap-2 px-5 py-4 rounded-2xl text-sm font-semibold border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap flex-shrink-0">
-          <Plus size={15} strokeWidth={2.5} />
-          Добавить
-        </motion.button>
+        {isOffice && (
+          <motion.button onClick={openForm} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 500, damping: 20 }}
+            className="flex items-center gap-2 px-5 py-4 rounded-2xl text-sm font-semibold border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-all whitespace-nowrap flex-shrink-0">
+            <Plus size={15} strokeWidth={2.5} />
+            Добавить
+          </motion.button>
+        )}
       </div>
 
       <AnimatePresence>
@@ -112,14 +124,17 @@ export default function FinesSection({ city, companyId }: { city: string; compan
                   <X size={16} />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Охранник</label>
                   {employees.length > 0 ? (
                     <select value={form.guard} onChange={e => setForm({ ...form, guard: e.target.value })}
                       className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all cursor-pointer">
                       <option value="" className="bg-[#0a0a0f]">— Выберите —</option>
-                      {employees.map(e => <option key={e.id} value={e.name} className="bg-[#0a0a0f]">{e.name}</option>)}
+                      {/* Exclude the current user — office can't fine themselves. */}
+                      {employees
+                        .filter(e => e.name.trim().toLowerCase() !== (currentUser?.name || "").trim().toLowerCase())
+                        .map(e => <option key={e.id} value={e.name} className="bg-[#0a0a0f]">{e.name}</option>)}
                     </select>
                   ) : (
                     <input placeholder="ФИО охранника" value={form.guard} onChange={e => setForm({ ...form, guard: e.target.value })}
@@ -140,9 +155,8 @@ export default function FinesSection({ city, companyId }: { city: string; compan
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Статус</label>
                   <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
                     className="w-full bg-white/4 border border-white/8 focus:border-white/25 text-white rounded-xl px-5 py-4 text-[15px] outline-none transition-all appearance-none cursor-pointer">
-                    <option value="pending" className="bg-[#0a0a0f]">Ожидает</option>
-                    <option value="disputed" className="bg-[#0a0a0f]">Оспаривается</option>
-                    <option value="paid" className="bg-[#0a0a0f]">Оплачен</option>
+                    <option value="pending" className="bg-[#0a0a0f]">Не оплатил</option>
+                    <option value="paid" className="bg-[#0a0a0f]">Оплатил</option>
                   </select>
                 </div>
                 <div className="space-y-1.5 col-span-2">
@@ -188,7 +202,9 @@ export default function FinesSection({ city, companyId }: { city: string; compan
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-lg ${statusBg(r.data.status)} ${statusColor(r.data.status)}`}>{statusLabel(r.data.status)}</span>
-                  <button onClick={() => remove(r.id)} className="opacity-40 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all"><Trash2 size={14} /></button>
+                  {isOffice && (
+                    <button onClick={() => remove(r.id)} className="opacity-40 group-hover:opacity-100 text-white/20 hover:text-red-400 transition-all"><Trash2 size={14} /></button>
+                  )}
                 </div>
               </div>
               {r.files && r.files.length > 0 && (

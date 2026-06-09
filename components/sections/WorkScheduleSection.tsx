@@ -217,7 +217,7 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
                   </div>
                 </div>
                 {/* Сотрудник */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">ФИО сотрудника *</label>
                     {employees.length > 0 ? (
@@ -241,7 +241,7 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium flex items-center gap-1.5">
                     <Clock size={11} className="text-green-400" /> Период работы *
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <span className="text-[10px] text-white/25">Начало</span>
                       <input type="date" value={form.workStart}
@@ -262,7 +262,7 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium flex items-center gap-1.5">
                     <Moon size={11} className="text-blue-400" /> Период отдыха
                   </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <span className="text-[10px] text-white/25">Начало отдыха</span>
                       <input type="date" value={form.restStart}
@@ -280,7 +280,7 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
                 </div>
                 {/* Часы смены */}
                 {(form.scheduleType === "daily" || form.scheduleType === "custom") && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Часов в смене</label>
                       <input type="number" placeholder="24" value={form.shiftHours}
@@ -378,7 +378,7 @@ export default function WorkScheduleSection({ city, companyId }: { city: string;
                         {/* Визуальная шкала */}
                         <ScheduleTimeline schedule={s} />
                         {/* Детали */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div className="bg-white/3 rounded-xl p-3">
                             <div className="flex items-center gap-1.5 text-green-400 mb-1">
                               <Clock size={12} />

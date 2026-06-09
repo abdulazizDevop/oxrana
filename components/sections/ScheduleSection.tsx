@@ -80,7 +80,7 @@ export default function ScheduleSection({ city, companyId }: { city: string; com
                   <X size={16} />
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Охранник</label>
                   {employees.length > 0 ? (

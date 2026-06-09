@@ -157,7 +157,7 @@ export default function PatrolSection({ city, companyId }: { city: string; compa
                     <X size={16} />
                   </button>
                 </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3" style={{ marginBottom: 16 }}>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-white/35 uppercase tracking-widest font-medium">Охранник</label>
                   {employees.length > 0 ? (

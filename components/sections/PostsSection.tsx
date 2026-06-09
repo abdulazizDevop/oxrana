@@ -132,7 +132,10 @@ export default function PostsSection({ city, companyId }: { city: string; compan
                   <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0"><Building2 size={16} className="text-purple-400" /></div>
                   <div className="min-w-0">
                     <p className="text-white text-sm font-medium truncate">{r.data.post_name}</p>
-                    <p className="text-white/30 text-xs truncate">{r.data.guard}{r.data.notes ? ` · ${r.data.notes}` : ""}</p>
+                    <p className="text-white/40 text-xs truncate">{r.data.guard}</p>
+                    {r.data.notes && (
+                      <p className="text-white/55 text-xs mt-1 whitespace-pre-wrap break-words">{r.data.notes}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
