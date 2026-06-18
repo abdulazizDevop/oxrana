@@ -385,6 +385,10 @@ export async function initDb() {
       ALTER TABLE app_users ADD COLUMN IF NOT EXISTS email TEXT;
       ALTER TABLE app_users ADD COLUMN IF NOT EXISTS phone TEXT;
 
+      -- Photos attached to a vehicle entry (kuzov/bagaj snapshots).
+      -- Stored as JSONB array of { url, fileName, fileType } objects.
+      ALTER TABLE transport_log ADD COLUMN IF NOT EXISTS photo_urls JSONB DEFAULT '[]'::jsonb;
+
       -- ─── Indexes for hot lookup paths ─────────────────────────────────────────
       -- Each one below targets a query pattern that the API runs frequently.
       -- IF NOT EXISTS lets initDb() be safely re-run on every cold start.

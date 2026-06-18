@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   try {
     const auth = await requireAuth(req);
     if (auth instanceof NextResponse) return auth;
-    const { cityId, companyId, vehicleId, plateNumber, driverName, listType, action, loggedBy, loggedByRole, note } = await req.json();
+    const { cityId, companyId, vehicleId, plateNumber, driverName, listType, action, loggedBy, loggedByRole, note, photoUrls } = await req.json();
     if (!plateNumber || !action || !listType) return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
 
     // Verify vehicle exists before logging (avoid FK violation)
@@ -43,10 +43,14 @@ export async function POST(req: NextRequest) {
       if (check.rows.length > 0) resolvedVehicleId = vehicleId;
     }
 
+    // photoUrls is expected to be an array of { url, fileName, fileType } objects
+    // captured by the FileUpload component in the entry/exit modal.
+    const photosJson = JSON.stringify(Array.isArray(photoUrls) ? photoUrls : []);
+
     const res = await query(
-      `INSERT INTO transport_log (city_id, company_id, vehicle_id, plate_number, driver_name, list_type, action, logged_by, logged_by_role, note)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [cityId, companyId, resolvedVehicleId, plateNumber, driverName || '', listType, action, loggedBy || '', loggedByRole || '', note || '']
+      `INSERT INTO transport_log (city_id, company_id, vehicle_id, plate_number, driver_name, list_type, action, logged_by, logged_by_role, note, photo_urls)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb) RETURNING *`,
+      [cityId, companyId, resolvedVehicleId, plateNumber, driverName || '', listType, action, loggedBy || '', loggedByRole || '', note || '', photosJson]
     );
     return NextResponse.json(res.rows[0]);
   } catch (e: any) {

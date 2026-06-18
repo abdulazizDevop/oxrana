@@ -3,6 +3,9 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Trash2, ArrowRightCircle, ArrowLeftCircle } from "lucide-react";
 import { AppUser } from "@/lib/auth";
+import FileUpload from "@/components/FileUpload";
+
+type LogPhoto = { url: string; fileName: string; fileType: string };
 
 type ListType = "allowed" | "working";
 type Vehicle = {
@@ -15,6 +18,7 @@ type LogEntry = {
   id: string; plate_number: string; driver_name: string; list_type: ListType;
   action: "entry" | "exit"; logged_by: string; logged_by_role: string;
   note: string; logged_at: string;
+  photo_urls?: LogPhoto[] | null;
 };
 
 const LIST_META = {
@@ -35,6 +39,7 @@ export default function TransportSection({ city, companyId, currentUser }: { cit
 
   const [entryConfirm, setEntryConfirm] = useState<Vehicle | null>(null);
   const [entryNote, setEntryNote]       = useState("");
+  const [entryPhotos, setEntryPhotos]   = useState<LogPhoto[]>([]);
   const [entryLoading, setEntryLoading] = useState(false);
   const [exitConfirm, setExitConfirm]   = useState<Vehicle | null>(null);
   const [exitLoading, setExitLoading]   = useState(false);
@@ -79,10 +84,10 @@ export default function TransportSection({ city, companyId, currentUser }: { cit
     setShowAddForm(false); setSaving(false); fetchVehicles();
   };
 
-  const logAction = async (vehicle: Vehicle, action: "entry" | "exit", note = "") => {
+  const logAction = async (vehicle: Vehicle, action: "entry" | "exit", note = "", photoUrls: LogPhoto[] = []) => {
     const res = await fetch("/api/transport/log", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cityId: city, companyId: companyId || "", vehicleId: vehicle.id, plateNumber: vehicle.plate_number, driverName: vehicle.driver_name, listType: vehicle.list_type, action, loggedBy: currentUser?.name || "Неизвестно", loggedByRole: currentUser?.role || "", note }),
+      body: JSON.stringify({ cityId: city, companyId: companyId || "", vehicleId: vehicle.id, plateNumber: vehicle.plate_number, driverName: vehicle.driver_name, listType: vehicle.list_type, action, loggedBy: currentUser?.name || "Неизвестно", loggedByRole: currentUser?.role || "", note, photoUrls }),
     });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e?.error || "Ошибка сервера"); }
   };
@@ -90,7 +95,11 @@ export default function TransportSection({ city, companyId, currentUser }: { cit
   const handleEntry = async () => {
     if (!entryConfirm) return;
     setEntryLoading(true);
-    try { await logAction(entryConfirm, "entry", entryNote); setEntryConfirm(null); setEntryNote(""); fetchVehicles(); }
+    try {
+      await logAction(entryConfirm, "entry", entryNote, entryPhotos);
+      setEntryConfirm(null); setEntryNote(""); setEntryPhotos([]);
+      fetchVehicles();
+    }
     catch (e: any) { setActionError(e.message); }
     finally { setEntryLoading(false); }
   };
@@ -342,13 +351,22 @@ export default function TransportSection({ city, companyId, currentUser }: { cit
               <h3 style={{ fontSize: 16, fontWeight: 700, color: "#f0f0fa", marginBottom: 4 }}>Зафиксировать въезд?</h3>
               <div style={{ fontSize: 22, fontWeight: 900, color: "#f0f0fa", marginBottom: 4, letterSpacing: "-0.3px" }}>{entryConfirm.plate_number}</div>
               {entryConfirm.driver_name && <div style={{ fontSize: 13, color: "#505068", marginBottom: 16 }}>{entryConfirm.driver_name}</div>}
-              <div style={{ marginBottom: 18, textAlign: "left" }}>
+              <div style={{ marginBottom: 14, textAlign: "left" }}>
                 <label style={{ display: "block", fontSize: 10, color: "#404058", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700, marginBottom: 6 }}>Заметка</label>
                 <input value={entryNote} onChange={e => setEntryNote(e.target.value)} placeholder="Необязательно..."
                   style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1.5px solid rgba(255,255,255,0.08)", borderRadius: 13, padding: "11px 14px", fontSize: 13, color: "#f0f0fa", outline: "none" }} />
               </div>
+              {/* Snapshot of vehicle body/trunk on entry. Photos go to S3 immediately and the URLs are
+                  collected in entryPhotos so they're saved alongside the transport_log row. */}
+              <div style={{ marginBottom: 18, textAlign: "left" }}>
+                <FileUpload
+                  companyId={companyId}
+                  files={[]}
+                  onUpload={(f) => setEntryPhotos(prev => [...prev, { url: f.url, fileName: f.fileName, fileType: f.fileType }])}
+                />
+              </div>
               <div style={{ display: "flex", gap: 10 }}>
-                <button onClick={() => setEntryConfirm(null)} disabled={entryLoading}
+                <button onClick={() => { setEntryConfirm(null); setEntryPhotos([]); setEntryNote(""); }} disabled={entryLoading}
                   style={{ flex: 1, padding: "13px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "#606078", fontSize: 13, cursor: "pointer" }}>Отмена</button>
                 <motion.button whileTap={{ scale: 0.96 }} onClick={handleEntry} disabled={entryLoading}
                   style={{ flex: 1, padding: "13px", borderRadius: 14, background: "rgba(74,222,128,0.15)", border: "1.5px solid rgba(74,222,128,0.3)", color: "#4ade80", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: entryLoading ? 0.6 : 1 }}>
@@ -443,6 +461,23 @@ export default function TransportSection({ city, companyId, currentUser }: { cit
                           <span style={{ color: "#606080" }}>{entry.logged_by}</span>
                           {entry.note && <span style={{ color: "#383855" }}> · {entry.note}</span>}
                         </p>
+                        {/* Snapshots taken at entry — show as thumbnails that open the original. */}
+                        {Array.isArray(entry.photo_urls) && entry.photo_urls.length > 0 && (
+                          <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+                            {entry.photo_urls.map((p, idx) => (
+                              p.fileType?.startsWith("image/") ? (
+                                <a key={idx} href={p.url} target="_blank" rel="noreferrer">
+                                  <img src={p.url} alt={p.fileName} style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover", border: "1px solid rgba(255,255,255,0.08)" }} />
+                                </a>
+                              ) : (
+                                <a key={idx} href={p.url} target="_blank" rel="noreferrer"
+                                  style={{ width: 44, height: 44, borderRadius: 8, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, color: "rgba(255,255,255,0.4)" }}>
+                                  видео
+                                </a>
+                              )
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
                         <div style={{ fontSize: 12, color: "#505068" }}>{new Date(entry.logged_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" })}</div>
