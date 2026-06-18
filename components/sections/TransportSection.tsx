@@ -42,6 +42,7 @@ export default function TransportSection({ city, companyId, currentUser }: { cit
   const [entryPhotos, setEntryPhotos]   = useState<LogPhoto[]>([]);
   const [entryLoading, setEntryLoading] = useState(false);
   const [exitConfirm, setExitConfirm]   = useState<Vehicle | null>(null);
+  const [exitPhotos, setExitPhotos]     = useState<LogPhoto[]>([]);
   const [exitLoading, setExitLoading]   = useState(false);
 
   const [showLog, setShowLog]           = useState(false);
@@ -107,7 +108,11 @@ export default function TransportSection({ city, companyId, currentUser }: { cit
   const handleExit = async () => {
     if (!exitConfirm) return;
     setExitLoading(true);
-    try { await logAction(exitConfirm, "exit"); setExitConfirm(null); fetchVehicles(); }
+    try {
+      await logAction(exitConfirm, "exit", "", exitPhotos);
+      setExitConfirm(null); setExitPhotos([]);
+      fetchVehicles();
+    }
     catch (e: any) { setActionError(e.message); }
     finally { setExitLoading(false); }
   };
@@ -392,12 +397,20 @@ export default function TransportSection({ city, companyId, currentUser }: { cit
               <div style={{ fontSize: 22, fontWeight: 900, color: "#f0f0fa", marginBottom: 4 }}>{exitConfirm.plate_number}</div>
               {exitConfirm.driver_name && <div style={{ fontSize: 13, color: "#505068", marginBottom: 4 }}>{exitConfirm.driver_name}</div>}
               {exitConfirm.today_last_time && (
-                <div style={{ fontSize: 12, color: "#383855", marginBottom: 18 }}>
+                <div style={{ fontSize: 12, color: "#383855", marginBottom: 14 }}>
                   Въехал в {new Date(exitConfirm.today_last_time).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
                 </div>
               )}
+              {/* Same snapshot capability on exit — guard documents condition of body/trunk on the way out. */}
+              <div style={{ marginBottom: 18, textAlign: "left" }}>
+                <FileUpload
+                  companyId={companyId}
+                  files={[]}
+                  onUpload={(f) => setExitPhotos(prev => [...prev, { url: f.url, fileName: f.fileName, fileType: f.fileType }])}
+                />
+              </div>
               <div style={{ display: "flex", gap: 10 }}>
-                <button onClick={() => setExitConfirm(null)} disabled={exitLoading}
+                <button onClick={() => { setExitConfirm(null); setExitPhotos([]); }} disabled={exitLoading}
                   style={{ flex: 1, padding: "13px", borderRadius: 14, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "#606078", fontSize: 13, cursor: "pointer" }}>Отмена</button>
                 <motion.button whileTap={{ scale: 0.96 }} onClick={handleExit} disabled={exitLoading}
                   style={{ flex: 1, padding: "13px", borderRadius: 14, background: "linear-gradient(135deg, #ef4444, #c1121f)", border: "none", color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: exitLoading ? 0.6 : 1 }}>
