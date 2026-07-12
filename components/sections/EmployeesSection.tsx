@@ -16,6 +16,24 @@ const AVAILABLE_SECTIONS = [
   { id: "conference", label: "Конференция", icon: "🎥" },
 ];
 
+// Role catalog shown to the company_manager when they add/edit an employee.
+// Includes "Офис" (company_manager) so an office can promote someone to co-office —
+// previously the form was locked to "Охранник" and this couldn't be done from the UI.
+const AVAILABLE_ROLES = [
+  { value: "Охранник", label: "Охранник" },
+  { value: "Старший охранник", label: "Старший охранник" },
+  { value: "Начальник смены", label: "Начальник смены" },
+  { value: "Инспектор", label: "Инспектор" },
+  { value: "Оперативный дежурный", label: "Оперативный дежурный" },
+  { value: "Менеджер объекта", label: "Менеджер объекта" },
+  { value: "company_manager", label: "Офис (менеджер офиса)" },
+];
+
+// Lookup helper — used when rendering section badges on the employee card.
+const SECTION_META: Record<string, { label: string; icon: string }> = Object.fromEntries(
+  AVAILABLE_SECTIONS.map(s => [s.id, { label: s.label, icon: s.icon }])
+);
+
 export default function EmployeesSection({ city, companyId }: { city: string; companyId?: string }) {
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -133,7 +151,16 @@ export default function EmployeesSection({ city, companyId }: { city: string; co
             <div style={{ background: "rgba(255,255,255,0.05)", padding: 20, borderRadius: 16, display: "flex", flexDirection: "column", gap: 14, marginBottom: 16, border: "1px solid rgba(255,255,255,0.08)" }}>
               <h3 style={{ fontSize: 15, fontWeight: 600, color: "#fff", margin: "0 0 4px 0" }}>{editingId ? "Редактирование сотрудника" : "Данные сотрудника"}</h3>
               <input placeholder="ФИО (например: Иванов Иван)" value={form.name} onChange={e => setForm({...form, name: e.target.value})} style={inp} />
-              <input placeholder="Должность (Охранник, Диспетчер...)" value={form.profession} onChange={e => setForm({...form, profession: e.target.value})} style={inp} />
+              <div>
+                <label style={{ display: "block", fontSize: 10, color: "#a0a0b8", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.05em" }}>Роль</label>
+                <select value={form.role} onChange={e => setForm({...form, role: e.target.value})}
+                  style={{ ...inp, cursor: "pointer" }}>
+                  {AVAILABLE_ROLES.map(r => (
+                    <option key={r.value} value={r.value} style={{ background: "#0a0a14" }}>{r.label}</option>
+                  ))}
+                </select>
+              </div>
+              <input placeholder="Должность (Диспетчер, Оператор...) — необязательно" value={form.profession} onChange={e => setForm({...form, profession: e.target.value})} style={inp} />
               <div style={{ display: "flex", gap: 10 }}>
                 <input placeholder="Логин для входа" value={form.login} onChange={e => setForm({...form, login: e.target.value})} style={{...inp, flex: 1}} />
                 <input placeholder={editingId ? "Новый пароль (оставьте пустым, если не меняете)" : "Пароль"} value={form.password} onChange={e => setForm({...form, password: e.target.value})} style={{...inp, flex: 1}} />
@@ -183,8 +210,27 @@ export default function EmployeesSection({ city, companyId }: { city: string; co
                     </div>
                     <div style={{ fontSize: 12, color: "#a0a0b8", display: "flex", flexWrap: "wrap", gap: "4px 12px" }}>
                       <span>Логин: <strong style={{color:"#e8e8f0"}}>{u.login}</strong></span>
-                      <span>Секций: <strong style={{color:"#e8e8f0"}}>{u.allowedSections?.length || u.allowed_sections?.length || 0}</strong></span>
                     </div>
+                    {/* Section badges — the client asked to see WHICH access each employee has, not just a count. */}
+                    {(() => {
+                      const sections: string[] = (u.allowedSections?.length ? u.allowedSections : u.allowed_sections) || [];
+                      if (sections.length === 0) {
+                        return <div style={{ fontSize: 11, color: "#ef4444", marginTop: 8, fontWeight: 600 }}>⚠️ Нет доступа</div>;
+                      }
+                      return (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
+                          {sections.map(s => {
+                            const meta = SECTION_META[s];
+                            if (!meta) return null;
+                            return (
+                              <span key={s} style={{ fontSize: 10, padding: "3px 7px", borderRadius: 6, background: "rgba(79,142,247,0.1)", color: "#7aaef7", border: "1px solid rgba(79,142,247,0.2)", whiteSpace: "nowrap" }}>
+                                {meta.icon} {meta.label}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     <button onClick={() => viewingScheduleId === u.id ? setViewingScheduleId(null) : fetchEmpSchedule(u.name, u.id)}
